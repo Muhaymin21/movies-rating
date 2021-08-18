@@ -39,7 +39,7 @@ const movies = [
   },
   {
     name: "Gunpowder Milkshake",
-    imgPath: "http://127.0.0.1:5000/static/images/gunpowder.jpg",
+    imgPath: "/static/images/gunpowder.jpg",
     description:
       "The film stars Karen Gillan as a young assassin who must team up with her estranged assassin mother...",
     rate: 6,
@@ -47,7 +47,7 @@ const movies = [
   },
   {
     name: "Cruella",
-    imgPath: "http://127.0.0.1:5000/static/images/cruella.jpg",
+    imgPath: "/static/images/cruella.jpg",
     description:
       "Cruella is a 2021 American crime comedy film based on the character Cruella de Vil from Dodie Smith's...",
     rate: 7.4,
@@ -55,7 +55,7 @@ const movies = [
   },
   {
     name: "",
-    imgPath: "http://127.0.0.1:5000/static/images/blast-from-past.jpg",
+    imgPath: "/static/images/blast-from-past.jpg",
     description:
       "Eccentric American scientist Dr. Calvin Webber (Christopher Walken) believes nuclear war with the Soviet Union is imminent...",
     rate: 6.6,

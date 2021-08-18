@@ -1,8 +1,8 @@
-client/node_modules
-/client/node_modules
+node_modules
+/node_modules
 venv
 /venv
 __pycache__
 /__pycache__
 .idea
-/.ideagit rm -r --cached myFolder
+/.idea

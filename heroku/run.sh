@@ -1,1 +1,0 @@
-npm build --prefix client

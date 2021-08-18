@@ -10,7 +10,7 @@ const useStyles = makeStyles({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    margin: 50,
+    margin: "30px 0"
   },
 });
 

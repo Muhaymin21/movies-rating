@@ -1,18 +1,26 @@
 from flask import Flask, jsonify
 from auth import AuthError, requires_auth
+from flask_cors import CORS
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="client/build")
+
+CORS(app)
 
 
-@app.route('/')
+@app.route('/api/')
 def hello_world():
     return 'Hello World!'
 
 
-@app.route('/protected')
+@app.route('/api/protected')
 @requires_auth()
 def hello_world_protected():
     return 'Hello World!'
+
+
+@app.route('/')
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 @app.errorhandler(404)
@@ -41,4 +49,4 @@ def auth_erros(error):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

@@ -65,7 +65,7 @@ export default function MovieCard(props) {
       />
       <CardMedia
         className={classes.media}
-        image={require(props.image)}
+        image={props.image}
         title="poster"
       />
       <CardContent>

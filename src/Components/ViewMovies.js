@@ -2,6 +2,8 @@ import MovieCard from "./MovieCard";
 import { Container, Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
+
+const imagesPath = process.env.PUBLIC_URL + '/assets/images/';
 const useStyles = makeStyles({
   root: {
     padding: "0 5 5",
@@ -15,7 +17,7 @@ const useStyles = makeStyles({
 const movies = [
   {
     name: "Gunpowder Milkshake",
-    imgPath: "http://127.0.0.1:5000/static/images/gunpowder.jpg",
+    imgPath: "gunpowder.jpg",
     description:
       "The film stars Karen Gillan as a young assassin who must team up with her estranged assassin mother...",
     rate: 6,
@@ -23,15 +25,15 @@ const movies = [
   },
   {
     name: "Cruella",
-    imgPath: "http://127.0.0.1:5000/static/images/cruella.jpg",
+    imgPath: "cruella.jpg",
     description:
       "Cruella is a 2021 American crime comedy film based on the character Cruella de Vil from Dodie Smith's...",
     rate: 7.4,
     date: "May 28, 2021",
   },
   {
-    name: "",
-    imgPath: "http://127.0.0.1:5000/static/images/blast-from-past.jpg",
+    name: "Blast from the past",
+    imgPath: "blast-from-past.jpg",
     description:
       "Eccentric American scientist Dr. Calvin Webber (Christopher Walken) believes nuclear war with the Soviet Union is imminent...",
     rate: 6.6,
@@ -39,7 +41,7 @@ const movies = [
   },
   {
     name: "Gunpowder Milkshake",
-    imgPath: "/static/images/gunpowder.jpg",
+    imgPath: "gunpowder.jpg",
     description:
       "The film stars Karen Gillan as a young assassin who must team up with her estranged assassin mother...",
     rate: 6,
@@ -47,15 +49,15 @@ const movies = [
   },
   {
     name: "Cruella",
-    imgPath: "/static/images/cruella.jpg",
+    imgPath: "cruella.jpg",
     description:
       "Cruella is a 2021 American crime comedy film based on the character Cruella de Vil from Dodie Smith's...",
     rate: 7.4,
     date: "May 28, 2021",
   },
   {
-    name: "",
-    imgPath: "/static/images/blast-from-past.jpg",
+    name: "Blast from the past",
+    imgPath: "blast-from-past.jpg",
     description:
       "Eccentric American scientist Dr. Calvin Webber (Christopher Walken) believes nuclear war with the Soviet Union is imminent...",
     rate: 6.6,
@@ -74,7 +76,7 @@ export default function ViewMovies() {
               date={obj.date}
               rate={obj.rate}
               title={obj.name}
-              image={obj.imgPath}
+              image={imagesPath + obj.imgPath}
               description={obj.description}
             />
           </Grid>

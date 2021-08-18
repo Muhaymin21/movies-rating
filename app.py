@@ -1,10 +1,7 @@
 from flask import Flask, jsonify
 from auth import AuthError, requires_auth
-from flask_cors import CORS
 
-app = Flask(__name__, static_folder="client/build")
-
-CORS(app)
+app = Flask(__name__, static_folder='client/build/', static_url_path='/')
 
 
 @app.route('/api/')
@@ -19,8 +16,13 @@ def hello_world_protected():
 
 
 @app.route('/')
-def serve():
-    return send_from_directory(app.static_folder, 'index.html')
+def index():
+    return app.send_static_file('index.html')
+
+
+@app.route('/<path:path>')
+def static_file(path):
+    return app.send_static_file(path)
 
 
 @app.errorhandler(404)

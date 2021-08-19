@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from auth import AuthError, requires_auth
 from flask_migrate import Migrate
-from models import db
+from db_models import *
 
 
 app = Flask(__name__, static_folder='build/', static_url_path='/')
@@ -10,11 +10,12 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 
-@app.route('/api')
+@app.route('/api/movies')
 def hello_world():
+    movies = [movie.format_output() for movie in Movie.query.order_by(Movie.id).all()]
     return jsonify({
         "success": True,
-        "message": "Hello, World!"
+        "movies": movies
     })
 
 

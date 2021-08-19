@@ -1,8 +1,13 @@
 from flask import Flask, jsonify
 from auth import AuthError, requires_auth
+from flask_migrate import Migrate
+from models import db
 
 
 app = Flask(__name__, static_folder='build/', static_url_path='/')
+app.config.from_object('config')
+db.init_app(app)
+migrate = Migrate(app, db)
 
 
 @app.route('/api')
@@ -64,4 +69,4 @@ def auth_erros(error):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

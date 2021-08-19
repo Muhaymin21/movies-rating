@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
     },
     textArea: {
         height: 160,
-        overflowY: "scroll",
+        overflowY: "auto",
         marginTop: 10
     }
 }));

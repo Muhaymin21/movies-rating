@@ -1,18 +1,31 @@
 from flask import Flask, jsonify
 from auth import AuthError, requires_auth
 
+
 app = Flask(__name__, static_folder='build/', static_url_path='/')
 
 
-@app.route('/api/')
+@app.route('/api')
 def hello_world():
-    return 'Hello World!'
+    return jsonify({
+        "success": True,
+        "message": "Hello, World!"
+    })
+
+
+@app.route('/api/protected/rate')
+@requires_auth("rate:movies")
+def hello_world_protected_with_permission(payload):
+    return jsonify(payload)
 
 
 @app.route('/api/protected')
 @requires_auth()
 def hello_world_protected():
-    return 'Hello World!'
+    return jsonify({
+        "success": True,
+        "message": "Hello, Protected!"
+    })
 
 
 @app.route('/')
@@ -51,4 +64,4 @@ def auth_erros(error):
 
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)

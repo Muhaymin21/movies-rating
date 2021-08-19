@@ -8,12 +8,13 @@ import MyProfile from "./Components/MyProfile";
 import Loader from "./Layout/Loader";
 import { useAuth0 } from "@auth0/auth0-react";
 import ViewMovies from "./Components/ViewMovies";
+import axios from "axios";
 
 
 export default function App() {
   // const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
   const prefersDarkMode = useSelector((state) => state.darkMode.status);
-  const { isLoading } = useAuth0();
+  const { isLoading, isAuthenticated, getAccessTokenSilently } = useAuth0();
   // const [Loader] = useLoader();
 
   const theme = React.useMemo(
@@ -29,7 +30,14 @@ export default function App() {
     [prefersDarkMode]
   );
 
-  // if (isLoading) return <Loader />;
+if (!isLoading) {
+      if (isAuthenticated) {
+      getAccessTokenSilently().then(token=>{
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      });
+  } else
+          delete axios.defaults.headers.common['Authorization'];
+}
 
   return (
     <ThemeProvider theme={theme}>

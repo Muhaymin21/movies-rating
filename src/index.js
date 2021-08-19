@@ -10,6 +10,8 @@ ReactDOM.render(
     domain="dev-yl2ra7dk.us.auth0.com"
     clientId="tuq7hBIMP0FnpmNVpJtyhMzgljB2StF7"
     redirectUri={window.location.origin}
+    audience="udacity-capstone-api"
+    scope="rate:movies"
   >
     <Provider store={store}>
       <App />

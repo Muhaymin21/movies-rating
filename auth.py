@@ -38,6 +38,8 @@ def get_token_auth_header():
 
 
 def check_permissions(permission, payload):
+    if permission == '':
+        return True
     if 'permissions' not in payload:
         raise AuthError({
             'success': False,
@@ -119,7 +121,10 @@ def requires_auth(permission=''):
             token = get_token_auth_header()
             payload = verify_decode_jwt(token)
             check_permissions(permission, payload)
-            return f(payload, *args, **kwargs)
+            if permission == '':
+                return f(*args, **kwargs)
+            else:
+                return f(payload, *args, **kwargs)
 
         return wrapper
 

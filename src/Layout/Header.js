@@ -35,6 +35,7 @@ import {
   Brightness4,
 } from "@material-ui/icons";
 
+
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -163,7 +164,7 @@ export default function Header() {
                   <Link to="myprofile" className={classes.linkStyle}>
                     <MenuItem onClick={handleCloseAccount}>Profile</MenuItem>
                   </Link>
-                  <MenuItem onClick={() => logout()}>Logout</MenuItem>
+                  <MenuItem onClick={() => logout({ returnTo: window.location.origin })}>Logout</MenuItem>
                 </Menu>
               </div>
             ) : (
@@ -171,7 +172,7 @@ export default function Header() {
                 variant="contained"
                 color="default"
                 endIcon={<AccountCircle />}
-                onClick={() => loginWithRedirect()}
+                onClick={loginWithRedirect}
               >
                 Login
               </Button>
@@ -234,7 +235,7 @@ export default function Header() {
                 </ListItem>
               </React.Fragment>
             ) : (
-              <ListItem key="Login" button onClick={() => loginWithRedirect()}>
+              <ListItem key="Login" button onClick={loginWithRedirect}>
                 <ListItemIcon>
                   <LockOpen />
                 </ListItemIcon>

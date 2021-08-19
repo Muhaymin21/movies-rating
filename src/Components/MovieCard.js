@@ -19,6 +19,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: 345,
+      height: 500
   },
   media: {
     height: 0,
@@ -37,11 +38,43 @@ const useStyles = makeStyles((theme) => ({
   avatar: {
     backgroundColor: yellow[500],
   },
+    more: {
+      color: theme.palette.info.dark,
+        textDecoration: "underline",
+        cursor: "pointer"
+    },
+    textArea: {
+        height: 160,
+        overflowY: "scroll",
+        marginTop: 10
+    }
 }));
+
+
 
 export default function MovieCard(props) {
   const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);
+
+  function ShortDesc() {
+      const len = props.description.length;
+      const [showMore, setShowMore] = React.useState(false);
+      function toggleReadMore () {
+          setShowMore(!showMore);
+      }
+    if (len > 250)
+        return (
+            <Typography variant="body2" color="textPrimary" component="p">
+                {showMore ? (
+                    <>{props.description} <span onClick={toggleReadMore} className={classes.more}>show less...</span></>
+                ) : (
+                    <>{props.description.substring(0,249)} <span onClick={toggleReadMore} className={classes.more}>show more...</span></>
+                ) }
+            </Typography>
+        )
+      else
+          return ( <Typography variant="body2" color="textPrimary" component="p">{props.description}</Typography> );
+}
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -68,10 +101,8 @@ export default function MovieCard(props) {
         image={props.image}
         title="poster"
       />
-      <CardContent>
-        <Typography variant="body2" color="textSecondary" component="p">
-          {props.description}
-        </Typography>
+      <CardContent className={classes.textArea}>
+          <ShortDesc />
       </CardContent>
       <CardActions disableSpacing>
         <IconButton aria-label="Like">

@@ -6,16 +6,6 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-# class Table(db.Model):
-#     def insert(self):
-#         db.session.add(self)
-#         db.session.commit()
-#
-#     def delete(self):
-#         db.session.delete(self)
-#         db.session.commit()
-
-
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), nullable=False)
@@ -25,6 +15,14 @@ class Movie(db.Model):
     img_path = db.Column(db.String, nullable=False)
     rates = db.relationship('Rate', backref='movie_rate', lazy=True, cascade="all, delete-orphan")
 
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
     def format_output(self):
         return {
             'id': self.id,
@@ -32,7 +30,7 @@ class Movie(db.Model):
             'description': self.description,
             'date': self.date,
             'rate': self.rate,
-            'img_path': self.img_path
+            'imgPath': self.img_path
         }
 
 

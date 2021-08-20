@@ -69,7 +69,7 @@ export default function MyProfile() {
                 <br />
                 Gender: {user.gender}
                 <br />
-                Birthday: {user.birthdate}
+                Birthday: {user.profile}
                 <br />
                 Your forms: 8
               </Typography>

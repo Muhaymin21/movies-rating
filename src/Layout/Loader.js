@@ -12,35 +12,14 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Loader() {
   const classes = useStyles();
-  //   const [open, setOpen] = React.useState(true);
-
-  //   const loaderOpenState = (newState = true) => {
-  //     setOpen(newState);
-  //   };
-
-  //   function loaderCon() {
-  //     return open ? (
-  //       <div className="lds-ripple">
-  //         <div />
-  //         <div />
-  //       </div>
-  //     ) : (
-  //       ""
-  //     );
-  //   }
-
-  //   function Loader() {
   return (
-    <>
-      <Backdrop className={classes.backdrop} open={true}>
-        <div className="lds-ripple">
-          <div />
-          <div />
-        </div>
-      </Backdrop>
-    </>
+      <>
+        <Backdrop className={classes.backdrop} open={true}>
+          <div className="lds-ripple">
+            <div/>
+            <div/>
+          </div>
+        </Backdrop>
+      </>
   );
-  //   }
-
-  //   return [Loader];
 }

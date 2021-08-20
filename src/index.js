@@ -11,7 +11,7 @@ ReactDOM.render(
     clientId="tuq7hBIMP0FnpmNVpJtyhMzgljB2StF7"
     redirectUri={window.location.origin}
     audience="udacity-capstone-api"
-    scope="write:rate"
+    scope=""
   >
     <Provider store={store}>
       <App />

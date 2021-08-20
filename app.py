@@ -10,16 +10,9 @@ app = Flask(__name__, static_folder='build/', static_url_path='/')
 app.config.from_object('config')
 db.init_app(app)
 migrate = Migrate(app, db)
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/api/movies')
-# @requires_auth("write:movie")
 def get_movies():
     movies = [movie.format_output() for movie in Movie.query.order_by(Movie.id).all()]
     return jsonify({
@@ -29,7 +22,7 @@ def get_movies():
 
 
 @app.route('/api/movies/create', methods=['POST'])
-# @requires_auth("write:movie")
+@requires_auth("write:movie")
 def create_movie():
     name = request.form.get('name')
     description = request.form.get('description')

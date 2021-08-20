@@ -7,11 +7,9 @@ import Loader from "../Layout/Loader";
 
 const useStyles = makeStyles({
   root: {
-    padding: "0 5 5",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    margin: "30px 0"
   },
 });
 

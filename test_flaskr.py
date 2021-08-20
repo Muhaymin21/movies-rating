@@ -23,7 +23,13 @@ class MovieTestCase(unittest.TestCase):
     def test_create_movie(self):
         res = self.client().post('/api/movies/create')  # No token provided
         data = json.loads(res.data)
-        self.assertEqual(res.status_code, 401)
+        self.assertEqual(res.status_code, 401)  # Unauthorized
+        self.assertEqual(data['success'], False)
+
+    def test_delete_movie(self):
+        res = self.client().delete('/api/movies/-1/delete')  # No token provided
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 401)  # Unauthorized
         self.assertEqual(data['success'], False)
 
     # def test_get_paginated_books(self):
@@ -117,6 +123,5 @@ class MovieTestCase(unittest.TestCase):
     #     self.assertEqual(data['message'], 'method not allowed')
 
 
-# Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()

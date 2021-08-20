@@ -1,3 +1,4 @@
+import os
 import sys
 
 from flask import Flask, jsonify, request, abort
@@ -12,18 +13,28 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 
+def paginate(page, selection, movies_per_page):
+    start = (page - 1) * movies_per_page
+    end = start + movies_per_page
+    movies = [movie.format_output() for movie in selection]
+    return movies[start:end]
+
+
 @app.route('/api/movies')
 def get_movies():
-    movies = [movie.format_output() for movie in Movie.query.order_by(Movie.id).all()]
+    query = Movie.query.order_by(Movie.id)
+    movies_per_page = request.args.get("perPage", 3, type=int)
+    movies = paginate(request.args.get('page', 1, type=int), query.all(), movies_per_page)
     return jsonify({
         "success": True,
-        "movies": movies
+        "movies": movies,
+        "count": query.count()
     })
 
 
 @app.route('/api/movies/create', methods=['POST'])
 @requires_auth("write:movie")
-def create_movie():
+def create_movie(payload):
     name = request.form.get('name')
     description = request.form.get('description')
     date = request.form.get('date')
@@ -39,15 +50,42 @@ def create_movie():
             img_path=img_path,
         )
         new_movie.insert()
+        return jsonify({
+            "success": True,
+            "id": new_movie.id
+        })
     except exc.SQLAlchemyError:
         db.session.rollback()
         print(sys.exc_info())
         abort(500)
     finally:
         db.session.close()
-        return jsonify({
-            "success": True
-        })
+
+
+@app.route('/api/movies/<int:movie_id>', methods=['DELETE'])
+@requires_auth("write:movie")
+def delete_movie(movie_id):
+    try:
+        query = Movie.query.filter_by(id=movie_id)
+        if query.count() > 0:
+            movie = query.first()
+            movie.delete()
+            return jsonify({
+                "success": True,
+                "id": movie_id
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "This movie does not exist",
+                "id": movie_id
+            })
+    except:
+        db.session.rollback()
+        print(sys.exc_info())
+        abort(500)
+    finally:
+        db.session.close()
 
 
 @app.route('/')

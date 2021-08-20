@@ -27,7 +27,7 @@ class MovieTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
 
     def test_delete_movie(self):
-        res = self.client().delete('/api/movies/-1/delete')  # No token provided
+        res = self.client().delete('/api/movies/1000')  # No token provided
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 401)  # Unauthorized
         self.assertEqual(data['success'], False)

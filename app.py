@@ -34,11 +34,13 @@ def get_movies():
 @app.route('/api/movies/create', methods=['POST'])
 @requires_auth("write:movie")
 def create_movie(payload):
-    name = request.form.get('name')
-    description = request.form.get('description')
-    date = request.form.get('date')
-    img_path = request.form.get('imgPath')
-    if not name or not description or not date or not img_path:
+    body = request.get_json().get('data')
+    name = body.get('name')
+    description = body.get('description')
+    date = body.get('date')
+    img_path = body.get('image')
+
+    if name is None or description is None or date is None or img_path is None:
         abort(400)
     try:
         new_movie = Movie(
@@ -77,7 +79,8 @@ def delete_movie(movie_id):
         else:
             return jsonify({
                 "success": False,
-                "error": "This movie does not exist",
+                "error": "404",
+                "message": "This movie does not exist",
                 "id": movie_id
             })
     except:

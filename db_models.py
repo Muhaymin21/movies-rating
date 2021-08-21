@@ -7,7 +7,7 @@ class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    date = db.Column(db.String(30), nullable=False)
+    date = db.Column(db.Date, nullable=False)
     all_rates_count = db.Column(db.Integer, default=0, nullable=False)
     all_rates_total = db.Column(db.Integer, default=0, nullable=False)
     img_path = db.Column(db.String, nullable=False)
@@ -23,12 +23,16 @@ class Movie(db.Model):
         db.session.commit()
 
     def format_output(self):
+        if self.all_rates_count == 0:
+            rate = 0
+        else:
+            rate = self.all_rates_total/self.all_rates_count
         return {
             'id': self.id,
             'name': self.name,
             'description': self.description,
             'date': self.date,
-            'rate': self.all_rates_total/self.all_rates_count,
+            'rate': rate,
             'imgPath': self.img_path
         }
 

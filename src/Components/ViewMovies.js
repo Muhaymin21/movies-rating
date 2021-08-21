@@ -43,7 +43,11 @@ export default function ViewMovies() {
           }
         },
         error => {
-          setError(error);
+          setError({
+            message: error.message,
+            status: error.response.status,
+            response: error.response.data.message
+          })
         }
       ).finally(()=>{setIsLoaded(true);})
   }, [page, rowsPerPage])
@@ -63,9 +67,17 @@ export default function ViewMovies() {
     />
       <Grid spacing={2} container justifyContent="center" alignItems="center">
       {error ? (
-          <Typography variant="body2" component="p">
+          <div style={{textAlign: "center", marginTop: 50, color: "red"}}>
+            <Typography variant="h3">
+            {error.status}
+          </Typography>
+          <Typography variant="h6">
             {error.message}
           </Typography>
+          <Typography variant="h6">
+            {error.response}
+          </Typography>
+          </div>
       ) : (movies.length > 0) ? (
         movies.map((obj, index) => (
           <Grid item key={index}>

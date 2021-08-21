@@ -88,6 +88,7 @@ def delete_movie(movie_id):
         db.session.close()
 
 
+# -----------------  start - return react frontend ----------------- #
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
@@ -97,6 +98,8 @@ def index():
 def static_file(path):
     return app.send_static_file(path)
 
+
+# -----------------  end - return react frontend ----------------- #
 
 @app.errorhandler(404)
 def not_found(error):

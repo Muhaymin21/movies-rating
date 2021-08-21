@@ -45,7 +45,8 @@ def create_movie(payload):
             name=name,
             description=description,
             date=date,
-            rate=0,
+            all_rates_count=0,
+            all_rates_total=0,
             img_path=img_path,
         )
         new_movie.insert()
@@ -99,7 +100,7 @@ def static_file(path):
 
 
 # -----------------  end - return react frontend ----------------- #
-
+# -----------------  start - errors handling ----------------- #
 @app.errorhandler(404)
 def not_found(error):
     print(error)
@@ -128,6 +129,7 @@ def bad_request(error):
         "error": 400,
         "message": "Bad request"
     }), 400
+# -----------------  end - errors handling ----------------- #
 
 
 @app.errorhandler(AuthError)

@@ -8,7 +8,8 @@ class Movie(db.Model):
     name = db.Column(db.String(30), nullable=False)
     description = db.Column(db.Text, nullable=False)
     date = db.Column(db.String(30), nullable=False)
-    rate = db.Column(db.Integer, default=0, nullable=False)
+    all_rates_count = db.Column(db.Integer, default=0, nullable=False)
+    all_rates_total = db.Column(db.Integer, default=0, nullable=False)
     img_path = db.Column(db.String, nullable=False)
     rates = db.relationship('Rate', backref='movie_rate', lazy=True, cascade="all, delete-orphan")
     comments = db.relationship('Comment', backref='movie_comments', lazy=True, cascade="all, delete-orphan")
@@ -27,7 +28,7 @@ class Movie(db.Model):
             'name': self.name,
             'description': self.description,
             'date': self.date,
-            'rate': self.rate,
+            'rate': self.all_rates_total/self.all_rates_count,
             'imgPath': self.img_path
         }
 

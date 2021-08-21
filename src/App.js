@@ -9,6 +9,7 @@ import Loader from "./Layout/Loader";
 import { useAuth0 } from "@auth0/auth0-react";
 import ViewMovies from "./Components/ViewMovies";
 import axios from "axios";
+import NewMovie from "./Components/NewMovie"
 
 
 export default function App() {
@@ -50,6 +51,7 @@ if (!isLoading) {
           <Switch>
             <Route path="/" exact component={ViewMovies} />
             <Route path="/myprofile" component={MyProfile} />
+              <Route path="/newmovie" component={NewMovie}/>
             <Route path="/aboutus">
               <div  style={{"textAlign": "center"}}>
               <h1>Capstone</h1>

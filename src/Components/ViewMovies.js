@@ -58,6 +58,7 @@ export default function ViewMovies() {
       onPageChange={handleChangePage}
       rowsPerPageOptions={[3, 6, 12, 24, 48, 96]}
       rowsPerPage={rowsPerPage}
+      labelRowsPerPage="Movies per page"
       onRowsPerPageChange={handleChangeRowsPerPage}
     />
       <Grid spacing={2} container justifyContent="center" alignItems="center">

@@ -16,12 +16,14 @@ export default function useAlert() {
     const [open, setOpen] = React.useState(false);
     const [type, setType] = React.useState("success");
     const [message, setMessage] = React.useState(" ");
-    function TransitionAlerts() {
+    function TransitionAlerts(props) {
         const classes = useStyles();
         return (
             <div className={classes.root}>
                 <Collapse in={open}>
                     <Alert
+                        style={props.style}
+                        className={props.className}
                         severity={type}
                         action={
                             <IconButton

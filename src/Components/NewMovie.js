@@ -16,9 +16,7 @@ const useStyles = makeStyles((theme) => ({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        flexDirection: "column"
-    },
-    form: {
+        flexDirection: "column",
         '& > *': {
             margin: theme.spacing(1),
             width: '70vw'
@@ -236,7 +234,7 @@ export default function NewMovie() {
         return (
             <Container className={classes.root}>
                 <TransitionAlerts/>
-                <form className={classes.form} noValidate onSubmit={submitHandler}>
+                <form noValidate onSubmit={submitHandler}>
                     <Grid container spacing={2} justifyContent="flex-end">
                         <Grid item xs={12} className={classes.gridSize}>
                             <TextField

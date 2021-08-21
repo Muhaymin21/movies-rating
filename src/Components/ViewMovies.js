@@ -66,7 +66,7 @@ export default function ViewMovies() {
           <Typography variant="body2" component="p">
             {error.message}
           </Typography>
-      ) : (
+      ) : (movies.length > 0) ? (
         movies.map((obj, index) => (
           <Grid item key={index}>
             <MovieCard
@@ -79,6 +79,13 @@ export default function ViewMovies() {
             />
           </Grid>
         ))
+      ) : (
+          <Grid item>
+            <Typography variant="h4">
+              <hr style={{margin: "30px 0"}}/>
+              No movies added yet.
+            </Typography>
+          </Grid>
       )}
         </Grid>
     </Container>

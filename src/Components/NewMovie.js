@@ -8,6 +8,7 @@ import {
 } from "@material-ui/core";
 import axios from "axios";
 import Loader from "../Layout/Loader";
+import useAlert from "../Layout/useAlert";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -36,8 +37,8 @@ const useStyles = makeStyles((theme) => ({
 export default function NewMovie() {
     const classes = useStyles();
     const [imageURL, setImageURL] = React.useState("");
-      const [error, setError] = React.useState(null);
-  const [isLoaded, setIsLoaded] = React.useState(true);
+    const [isLoaded, setIsLoaded] = React.useState(true);
+    const [setType, setMessage, setOpen, TransitionAlerts] = useAlert();
     const [formControl, setFormControl] = React.useState({
         name: {
             error: false,
@@ -177,7 +178,7 @@ export default function NewMovie() {
         })
     }
 
-    function submitHandler(e){
+    function submitHandler(e) {
         e.preventDefault();
         if (!formControl.name.canSubmit)
             setFormControl({...formControl, name: {...formControl.name, error: true}});
@@ -196,81 +197,108 @@ export default function NewMovie() {
                     date: formControl.date.value,
                     image: formControl.image.value
                 }
-            }).then(r=>{
-                console.log(r);
-            }, e=>{
-                setError(e);
-                console.log(error);
-            }).finally(()=>{setIsLoaded(true);});
+            }).then(r => {
+                if (r.data.success) {
+                    setType("success");
+                    setMessage("The movie has been successfully added with ID: " + r.data.id);
+                    setOpen(true);
+                    setFormControl({
+                        name: {
+                            ...formControl.name,
+                            value: ""
+                        },
+                        description: {
+                            ...formControl.description,
+                            value: ""
+                        },
+                        date: {
+                            ...formControl.date,
+                            value: ""
+                        },
+                        image: {
+                            ...formControl.image,
+                            value: ""
+                        }
+                    })
+                    setImageURL("");
+                }
+            }, e => {
+                setType("error");
+                setMessage("Failed to add a new movie: " + e.response.data.message);
+                setOpen(true);
+            }).finally(() => {
+                setIsLoaded(true);
+            });
         }
     }
 
     if (isLoaded)
-    return (
-        <Container className={classes.root}>
-            <form className={classes.form} noValidate onSubmit={submitHandler}>
-                <Grid container spacing={2} justifyContent="flex-end">
-                    <Grid item xs={12} className={classes.gridSize}>
-                        <TextField
-                            label="Name"
-                            variant="outlined"
-                            error={formControl.name.error}
-                            helperText={formControl.name.errorMessage}
-                            onInput={nameChangeHandler}
-                            value={formControl.name.value}
-                        />
+        return (
+            <Container className={classes.root}>
+                <TransitionAlerts/>
+                <form className={classes.form} noValidate onSubmit={submitHandler}>
+                    <Grid container spacing={2} justifyContent="flex-end">
+                        <Grid item xs={12} className={classes.gridSize}>
+                            <TextField
+                                label="Name"
+                                variant="outlined"
+                                error={formControl.name.error}
+                                helperText={formControl.name.errorMessage}
+                                onInput={nameChangeHandler}
+                                value={formControl.name.value}
+                            />
+                        </Grid>
+                        <Grid item xs={12} className={classes.gridSize}>
+                            <TextField
+                                label="Description"
+                                variant="outlined"
+                                error={formControl.description.error}
+                                helperText={formControl.description.errorMessage}
+                                onInput={descriptionChangeHandler}
+                                multiline
+                                rows={5}
+                                value={formControl.description.value}
+                            />
+                        </Grid>
+                        <Grid item xs={12} className={classes.gridSize}>
+                            <TextField
+                                variant="outlined"
+                                label="Relase date"
+                                type="date"
+                                onChange={dateHandler}
+                                error={formControl.date.error}
+                                helperText={formControl.date.errorMessage}
+                                value={formControl.date.value}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                        </Grid>
+                        <Grid item container xs={12} className={classes.gridSize}>
+                            <TextField
+                                label="Imgae URL"
+                                variant="outlined"
+                                error={formControl.image.error}
+                                value={formControl.image.value}
+                                helperText={formControl.image.errorMessage}
+                                onInput={imageChangeHandler}
+                            />
+                            {imageURL && (
+                                <img src={imageURL} className={classes.img} alt="poster"/>
+                            )}
+                        </Grid>
+                        <Grid item xs={12} className={classes.gridSize}>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                            >
+                                Submit
+                            </Button>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} className={classes.gridSize}>
-                        <TextField
-                            label="Description"
-                            variant="outlined"
-                            error={formControl.description.error}
-                            helperText={formControl.description.errorMessage}
-                            onInput={descriptionChangeHandler}
-                            multiline
-                            rows={5}
-                            value={formControl.description.value}
-                        />
-                    </Grid>
-                    <Grid item xs={12} className={classes.gridSize}>
-                        <TextField
-                            variant="outlined"
-                            label="Relase date"
-                            type="date"
-                            onChange={dateHandler}
-                            error={formControl.date.error}
-                            helperText={formControl.date.errorMessage}
-                            value={formControl.date.value}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
-                    </Grid>
-                    <Grid item container xs={12} className={classes.gridSize}>
-                        <TextField
-                            label="Imgae URL"
-                            variant="outlined"
-                            error={formControl.image.error}
-                            value={formControl.image.value}
-                            helperText={formControl.image.errorMessage}
-                            onInput={imageChangeHandler}
-                        />
-                        {imageURL && (
-                            <img src={imageURL} className={classes.img} alt="poster"/>
-                        )}
-                    </Grid>
-                    <Grid item xs={12} className={classes.gridSize}>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                        >
-                            Submit
-                        </Button>
-                    </Grid>
-                </Grid>
-            </form>
-        </Container>
-    );
+                </form>
+            </Container>
+        );
     else return <Loader/>
 }

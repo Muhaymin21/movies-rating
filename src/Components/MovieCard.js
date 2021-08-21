@@ -93,14 +93,23 @@ export default function MovieCard(props) {
             </CardContent>
             <CardActions disableSpacing>
                 {isAuthenticated && (
-                     <Rating
-                    name=""
-                    defaultValue={0}
-                    precision={0.5}
-                    emptyIcon={<StarBorder fontSize="inherit"/>}
-                />
+                    <Rating
+                        name={props.title}
+                        defaultValue={0}
+                        precision={0.5}
+                        emptyIcon={<StarBorder fontSize="inherit"/>}
+                    />
                 )}
-                <IconButton aria-label="share" style={{marginLeft: 'auto',}}>
+                <IconButton
+                    onClick={async () => {
+                        if (typeof navigator.share === "function")
+                        await navigator.share({
+                            title: props.title,
+                            text: props.description,
+                            url: window.location.origin + '/movies/' + props.id,
+                        })
+                    }}
+                    aria-label="share" style={{marginLeft: 'auto',}}>
                     <Share/>
                 </IconButton>
             </CardActions>

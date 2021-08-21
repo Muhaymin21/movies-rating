@@ -75,6 +75,7 @@ export default function ViewMovies() {
               title={obj.name}
               image={obj.imgPath}
               description={obj.description}
+              id={obj.id}
             />
           </Grid>
         ))

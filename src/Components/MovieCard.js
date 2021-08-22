@@ -1,9 +1,9 @@
 import React from 'react';
 import {makeStyles} from '@material-ui/core/styles';
 import {yellow} from '@material-ui/core/colors';
-import Rating from '@material-ui/lab/Rating';
-import {StarBorder, MoreVert, Share} from "@material-ui/icons";
-import {useAuth0} from "@auth0/auth0-react";
+import {MoreVert, Share} from "@material-ui/icons";
+// import {useAuth0} from "@auth0/auth0-react";
+import ReactStars from "react-rating-stars-component";
 import {
     Avatar,
     Card,
@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
         height: 160,
         overflowY: "auto",
         marginTop: 10,
-                [theme.breakpoints.down('xs')]: {
+        [theme.breakpoints.down('xs')]: {
             height: "auto",
         },
     }
@@ -52,7 +52,12 @@ const useStyles = makeStyles((theme) => ({
 
 export default function MovieCard(props) {
     const classes = useStyles();
-    const {isAuthenticated} = useAuth0();
+    // const {isAuthenticated} = useAuth0();
+    // const [starts, setStars] = React.useState(0);
+
+    const ratingChanged = (newRating) => {
+        console.log(`New rating: ${newRating} for movie with ID: ${props.id}`);
+    };
 
     function ShortDesc() {
         const len = props.description.length;
@@ -102,14 +107,10 @@ export default function MovieCard(props) {
                 <ShortDesc/>
             </CardContent>
             <CardActions disableSpacing>
-                {isAuthenticated && (
-                    <Rating
-                        name={props.title}
-                        defaultValue={0}
-                        precision={0.5}
-                        emptyIcon={<StarBorder fontSize="inherit"/>}
-                    />
-                )}
+                <ReactStars
+                    onChange={ratingChanged}
+                    size={24}
+                />
                 <IconButton
                     onClick={async () => {
                         if (typeof navigator.share === "function")

@@ -1,10 +1,11 @@
 import sys
 
 from flask import Flask, jsonify, request, abort
-from auth import AuthError, requires_auth
 from flask_migrate import Migrate
+from werkzeug.exceptions import NotFound
+
+from auth import AuthError, requires_auth
 from db_models import *
-from sqlalchemy import exc
 
 app = Flask(__name__, static_folder='build/', static_url_path='/')
 app.config.from_object('config')
@@ -31,17 +32,29 @@ def get_movies():
     })
 
 
+# noinspection PyUnusedLocal
 @app.route('/api/movies/create', methods=['POST'])
 @requires_auth("write:movie")
 def create_movie(payload):
-    body = request.get_json().get('data')
+    body = request.get_json()
+    if body is None:
+        abort(400, description="Please provide the data as json.")
+    if "data" not in body:
+        abort(400, description="The data should be inside data key.")
+    body = body.get('data')
     name = body.get('name')
     description = body.get('description')
     date = body.get('date')
     img_path = body.get('image')
 
-    if name is None or description is None or date is None or img_path is None:
-        abort(400)
+    if name is None:
+        abort(400, description="Please insert the movie name.")
+    if description is None:
+        abort(400, description="Please insert the movie description.")
+    if date is None:
+        abort(400, description="Please insert the movie date.")
+    if img_path is None:
+        abort(400, description="Please insert the movie image url.")
     try:
         new_movie = Movie(
             name=name,
@@ -56,17 +69,18 @@ def create_movie(payload):
             "success": True,
             "id": new_movie.id
         })
-    except exc.SQLAlchemyError:
+    except:
         db.session.rollback()
         print(sys.exc_info())
-        abort(500)
+        abort(500, description="The server failed to insert the new movie, please try again later.")
     finally:
         db.session.close()
 
 
+# noinspection PyUnusedLocal
 @app.route('/api/movies/<int:movie_id>', methods=['DELETE'])
-@requires_auth("write:movie")
-def delete_movie(movie_id):
+@requires_auth("delete:movie")
+def delete_movie(payload, movie_id):
     try:
         query = Movie.query.filter_by(id=movie_id)
         if query.count() > 0:
@@ -77,16 +91,13 @@ def delete_movie(movie_id):
                 "id": movie_id
             })
         else:
-            return jsonify({
-                "success": False,
-                "error": "404",
-                "message": "This movie does not exist",
-                "id": movie_id
-            })
+            raise NotFound()
+    except NotFound:
+        raise ResourceNotFound("This movie does not exist.")
     except:
         db.session.rollback()
         print(sys.exc_info())
-        abort(500)
+        abort(500, description="The server failed to delete the movie, please try again later.")
     finally:
         db.session.close()
 
@@ -103,41 +114,51 @@ def static_file(path):
 
 
 # -----------------  end - return react frontend ----------------- #
+
 # -----------------  start - errors handling ----------------- #
-@app.errorhandler(404)
-def not_found(error):
-    print(error)
+
+class ResourceNotFound(Exception):
+    def __init__(self, error):
+        self.error = error
+
+
+@app.errorhandler(ResourceNotFound)
+def send_404(error="Not found"):
     return jsonify({
         "success": False,
         "error": 404,
-        "message": "resource not found"
+        "message": str(error)
     }), 404
+
+
+# noinspection PyUnusedLocal
+@app.errorhandler(404)
+def not_found(error):
+    return app.send_static_file('index.html')  # 404 Handled in react (front-end)
 
 
 @app.errorhandler(500)
 def server_error(error):
-    print(error)
     return jsonify({
         "success": False,
         "error": 500,
-        "message": "The server failed to process the request"
+        "message": str(error)
     }), 500
 
 
 @app.errorhandler(400)
 def bad_request(error):
-    print(error)
     return jsonify({
         "success": False,
         "error": 400,
-        "message": "Bad request"
+        "message": str(error)
     }), 400
-# -----------------  end - errors handling ----------------- #
 
 
 @app.errorhandler(AuthError)
 def auth_erros(error):
     return jsonify(error.error), error.status_code
+# -----------------  end - errors handling ----------------- #
 
 
 if __name__ == '__main__':

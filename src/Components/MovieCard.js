@@ -17,8 +17,15 @@ import {
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        maxWidth: 345,
-        height: 500
+        width: 345,
+        marginTop: 10,
+        height: 500,
+        ['@media (max-width:370px)']: { // eslint-disable-line no-useless-computed-key
+            width: "80vw",
+        },
+        [theme.breakpoints.down('xs')]: {
+            height: "auto",
+        },
     },
     media: {
         height: 0,
@@ -35,7 +42,10 @@ const useStyles = makeStyles((theme) => ({
     textArea: {
         height: 160,
         overflowY: "auto",
-        marginTop: 10
+        marginTop: 10,
+                [theme.breakpoints.down('xs')]: {
+            height: "auto",
+        },
     }
 }));
 
@@ -103,11 +113,11 @@ export default function MovieCard(props) {
                 <IconButton
                     onClick={async () => {
                         if (typeof navigator.share === "function")
-                        await navigator.share({
-                            title: props.title,
-                            text: props.description,
-                            url: window.location.origin + '/movies/' + props.id,
-                        })
+                            await navigator.share({
+                                title: props.title,
+                                text: props.description,
+                                url: window.location.origin + '/movies/' + props.id,
+                            })
                     }}
                     aria-label="share" style={{marginLeft: 'auto',}}>
                     <Share/>

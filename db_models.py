@@ -33,6 +33,7 @@ class Movie(db.Model):
             'description': self.description,
             'date': self.date,
             'rate': rate,
+            'rateCount': self.all_rates_count,
             'imgPath': self.img_path
         }
 

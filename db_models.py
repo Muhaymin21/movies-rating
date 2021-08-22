@@ -51,6 +51,12 @@ class Rate(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def format_output(self):
+        return {
+            'rate': self.rate,
+            'movieID': self.movie_id,
+        }
+
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)

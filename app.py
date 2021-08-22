@@ -3,7 +3,6 @@ import sys
 from flask import Flask, jsonify, request, abort
 from flask_migrate import Migrate
 from werkzeug.exceptions import NotFound
-
 from auth import AuthError, requires_auth
 from db_models import *
 
@@ -47,20 +46,24 @@ def paginate(page, selection, movies_per_page):
     return movies[start:end]
 
 
-@app.route('/api/movies')
+@app.route('/api/movies')  # get all movies
 def get_movies():
-    query = Movie.query.order_by(Movie.id)
-    movies_per_page = request.args.get("perPage", 3, type=int)
-    movies = paginate(request.args.get('page', 1, type=int), query.all(), movies_per_page)
-    return jsonify({
-        "success": True,
-        "movies": movies,
-        "count": query.count()
-    })
+    try:
+        query = Movie.query.order_by(Movie.id)
+        movies_per_page = request.args.get("perPage", 3, type=int)
+        movies = paginate(request.args.get('page', 1, type=int), query.all(), movies_per_page)
+        return jsonify({
+            "success": True,
+            "movies": movies,
+            "count": query.count()
+        })
+    except:
+        print(sys.exc_info())
+        abort(500, description="The server failed to load the movies list, please try again later.")
 
 
 # noinspection PyUnusedLocal
-@app.route('/api/movies/create', methods=['POST'])
+@app.route('/api/movies/create', methods=['POST'])  # post new movie
 @requires_auth("write:movie")
 def create_movie(payload):
     data = check_all_data_posted(request.get_json())
@@ -87,7 +90,7 @@ def create_movie(payload):
 
 
 # noinspection PyUnusedLocal
-@app.route('/api/movies/<int:movie_id>', methods=['DELETE'])
+@app.route('/api/movies/<int:movie_id>', methods=['DELETE'])  # Delete movies
 @requires_auth("delete:movie")
 def delete_movie(payload, movie_id):
     try:
@@ -110,7 +113,7 @@ def delete_movie(payload, movie_id):
         db.session.close()
 
 
-@app.route('/api/movies/<int:movie_id>', methods=['PATCH'])
+@app.route('/api/movies/<int:movie_id>', methods=['PATCH'])  # Update movie data (except rate cannot be updated)
 @requires_auth("update:movie")
 def edit_movie(payload, movie_id):
     data = check_all_data_posted(request.get_json())
@@ -136,6 +139,49 @@ def edit_movie(payload, movie_id):
         abort(500, description="The server failed to edit the movie, please try again later.")
     finally:
         db.session.close()
+
+
+@app.route('/api/users/rates')
+@requires_auth("")  # User id is fetched from the token payload
+def get_user_rates(payload):
+    user_id = payload['sub'].split('|')[1]
+    # example payload {"sub": "auth0|611fbf35b540dd00l3fca567"}
+    if user_id is not None:
+        body = request.get_json()
+        if body is not None:
+            rates_id_list = body.get("rates")  # type: list
+            if rates_id_list is not None:
+                try:
+                    rates = [
+                        rate.format_output() for rate in Rate.query.filter_by(user_id=user_id).all()
+                        if rate.movie_id in rates_id_list
+                    ]
+                    return jsonify({"rates": rates})
+                except:
+                    print(sys.exc_info())
+                    abort(500, description="The server failed to get selected movies rate, please try again later.")
+            else:
+                abort(400, "Please include the selected movies id list")
+        else:
+            abort(400, "Please post json contain selected movies id list")
+    else:
+        abort(401, "The server failed to retrieve your ID, please try to sign out then sign in again.")
+
+
+@app.route('/api/movies/<int:movie_id>/rate', methods=['POST'])  # Rating movie the first time
+@requires_auth("write:rate")
+def rate_movie(payload, movie_id):
+    return jsonify({
+        "movieID": movie_id
+    })
+
+
+@app.route('/api/movies/<int:movie_id>/rate', methods=['PATCH'])  # Edit rated movie
+@requires_auth("write:rate")
+def update_rated_movie(payload, movie_id):
+    return jsonify({
+        "movieID": movie_id
+    })
 
 
 # -----------------  start - return react frontend ----------------- #
@@ -194,6 +240,8 @@ def bad_request(error):
 @app.errorhandler(AuthError)
 def auth_erros(error):
     return jsonify(error.error), error.status_code
+
+
 # -----------------  end - errors handling ----------------- #
 
 

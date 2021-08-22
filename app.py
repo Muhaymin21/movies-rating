@@ -13,6 +13,33 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 
+def check_all_data_posted(body):
+    if body is None:
+        abort(400, description="Please provide the data as json.")
+    if "data" not in body:
+        abort(400, description="The data should be inside data key.")
+    body = body.get('data')
+    name = body.get('name')
+    description = body.get('description')
+    date = body.get('date')
+    img_path = body.get('image')
+
+    if name is None:
+        abort(400, description="Please insert the movie name.")
+    if description is None:
+        abort(400, description="Please insert the movie description.")
+    if date is None:
+        abort(400, description="Please insert the movie date.")
+    if img_path is None:
+        abort(400, description="Please insert the movie image url.")
+    return {
+        "name": name,
+        "description": description,
+        "date": date,
+        "img_path": img_path
+    }
+
+
 def paginate(page, selection, movies_per_page):
     start = (page - 1) * movies_per_page
     end = start + movies_per_page
@@ -36,33 +63,15 @@ def get_movies():
 @app.route('/api/movies/create', methods=['POST'])
 @requires_auth("write:movie")
 def create_movie(payload):
-    body = request.get_json()
-    if body is None:
-        abort(400, description="Please provide the data as json.")
-    if "data" not in body:
-        abort(400, description="The data should be inside data key.")
-    body = body.get('data')
-    name = body.get('name')
-    description = body.get('description')
-    date = body.get('date')
-    img_path = body.get('image')
-
-    if name is None:
-        abort(400, description="Please insert the movie name.")
-    if description is None:
-        abort(400, description="Please insert the movie description.")
-    if date is None:
-        abort(400, description="Please insert the movie date.")
-    if img_path is None:
-        abort(400, description="Please insert the movie image url.")
+    data = check_all_data_posted(request.get_json())
     try:
         new_movie = Movie(
-            name=name,
-            description=description,
-            date=date,
+            name=data['name'],
+            description=data['description'],
+            date=data['date'],
             all_rates_count=0,
             all_rates_total=0,
-            img_path=img_path,
+            img_path=data['img_path'],
         )
         new_movie.insert()
         return jsonify({
@@ -82,9 +91,8 @@ def create_movie(payload):
 @requires_auth("delete:movie")
 def delete_movie(payload, movie_id):
     try:
-        query = Movie.query.filter_by(id=movie_id)
-        if query.count() > 0:
-            movie = query.first()
+        movie = Movie.query.filter_by(id=movie_id).one_or_none()
+        if movie is not None:
             movie.delete()
             return jsonify({
                 "success": True,
@@ -98,6 +106,34 @@ def delete_movie(payload, movie_id):
         db.session.rollback()
         print(sys.exc_info())
         abort(500, description="The server failed to delete the movie, please try again later.")
+    finally:
+        db.session.close()
+
+
+@app.route('/api/movies/<int:movie_id>', methods=['PATCH'])
+@requires_auth("update:movie")
+def edit_movie(payload, movie_id):
+    data = check_all_data_posted(request.get_json())
+    try:
+        movie = Movie.query.filter_by(id=movie_id).one_or_none()
+        if movie is not None:
+            movie.name = data['name']
+            movie.description = data['description']
+            movie.date = data['date']
+            movie.img_path = data['img_path']
+            db.session.commit()
+            return jsonify({
+                "success": True,
+                "id": movie_id
+            })
+        else:
+            raise NotFound()
+    except NotFound:
+        raise ResourceNotFound("This movie does not exist.")
+    except:
+        db.session.rollback()
+        print(sys.exc_info())
+        abort(500, description="The server failed to edit the movie, please try again later.")
     finally:
         db.session.close()
 

@@ -53,8 +53,7 @@ class Rate(db.Model):
 
     def format_output(self):
         return {
-            'rate': self.rate,
-            'movieID': self.movie_id,
+            self.movie_id: self.rate
         }
 
 

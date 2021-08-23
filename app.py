@@ -173,7 +173,7 @@ def edit_movie(payload, movie_id):
         db.session.close()
 
 
-@app.route('/api/users/rates')
+@app.route('/api/users/rates', methods=['POST'])
 @requires_auth("")  # User id is fetched from the token payload
 def get_user_rates(payload):
     user_id = get_user_id(payload)
@@ -183,10 +183,14 @@ def get_user_rates(payload):
         rates_id_list = body.get("rates")  # type: list
         if rates_id_list is not None:
             try:
-                rates = [
-                    rate.format_output() for rate in Rate.query.filter_by(user_id=user_id).all()
-                    if rate.movie_id in rates_id_list
-                ]
+                rates = {}
+                # rates = [
+                #     rate.format_output() for rate in Rate.query.filter_by(user_id=user_id).all()
+                #     if rate.movie_id in rates_id_list
+                # ]
+                for rate in Rate.query.filter_by(user_id=user_id).all():
+                    if rate.movie_id in rates_id_list:
+                        rates[rate.movie_id] = rate.rate
                 return jsonify({
                     "success": True,
                     "rates": rates

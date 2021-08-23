@@ -5,7 +5,7 @@ import Header from "./Layout/Header";
 import {useDispatch, useSelector} from "react-redux";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import MyProfile from "./Components/MyProfile";
-import Loader from "./Layout/Loader";
+import LoginLoader from "./Layout/LoginLoader";
 import { useAuth0 } from "@auth0/auth0-react";
 import ViewMovies from "./Components/ViewMovies";
 import axios from "axios";
@@ -39,7 +39,6 @@ if (!isLoading) {
         dispatch(setScopes(jwt.decode(token)['permissions']));
       });
   } else {
-          dispatch(setScopes([]));
           delete axios.defaults.headers.common['Authorization'];
       }
 }
@@ -50,7 +49,7 @@ if (!isLoading) {
       <Router>
         <Header />
         {isLoading ? (
-          <Loader />
+          <LoginLoader />
         ) : (
           <Switch>
             <Route path="/" exact component={ViewMovies} />

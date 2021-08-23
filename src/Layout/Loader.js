@@ -1,25 +1,30 @@
-import React from "react";
-import Backdrop from "@material-ui/core/Backdrop";
-import { makeStyles } from "@material-ui/core/styles";
-import "./useLoader.css";
+import "./css/Loader.css";
+import {makeStyles} from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
-  backdrop: {
-    zIndex: theme.zIndex.drawer + 1,
-    color: "#000",
-  },
+    root: {
+        '& div:after': {
+            backgroundColor: theme.palette.type === "dark" ? "white" : "black"
+        }
+    },
 }));
 
 export default function Loader() {
-  const classes = useStyles();
-  return (
-      <>
-        <Backdrop className={classes.backdrop} open={true}>
-          <div className="lds-ripple">
+    const classes = useStyles();
+    return (
+        <div className={`lds-spinner ${classes.root}`}>
             <div/>
             <div/>
-          </div>
-        </Backdrop>
-      </>
-  );
+            <div/>
+            <div/>
+            <div/>
+            <div/>
+            <div/>
+            <div/>
+            <div/>
+            <div/>
+            <div/>
+            <div/>
+        </div>
+    );
 }

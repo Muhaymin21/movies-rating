@@ -17,10 +17,13 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
+
+    },
+    form: {
         '& > *': {
             margin: theme.spacing(1),
             width: '70vw'
-        },
+        }
     },
     gridSize: {
         '& > *': {width: "100%"}
@@ -189,12 +192,10 @@ export default function NewMovie() {
         else {
             setIsLoaded(false);
             axios.post('/api/movies/create', {
-                data: {
-                    name: formControl.name.value,
-                    description: formControl.description.value,
-                    date: formControl.date.value,
-                    image: formControl.image.value
-                }
+                name: formControl.name.value,
+                description: formControl.description.value,
+                date: formControl.date.value,
+                image: formControl.image.value
             }).then(r => {
                 if (r.data.success) {
                     setType("success");
@@ -230,73 +231,75 @@ export default function NewMovie() {
         }
     }
 
-    if (isLoaded)
-        return (
-            <Container className={classes.root}>
-                <TransitionAlerts/>
-                <form noValidate onSubmit={submitHandler}>
-                    <Grid container spacing={2} justifyContent="flex-end">
-                        <Grid item xs={12} className={classes.gridSize}>
-                            <TextField
-                                label="Name"
-                                variant="outlined"
-                                error={formControl.name.error}
-                                helperText={formControl.name.errorMessage}
-                                onInput={nameChangeHandler}
-                                value={formControl.name.value}
-                            />
+    return (
+        <Container className={classes.root}>
+            {isLoaded ? (
+                <div className={classes.form}>
+                    <TransitionAlerts/>
+                    <form noValidate onSubmit={submitHandler}>
+                        <Grid container spacing={2} justifyContent="flex-end">
+                            <Grid item xs={12} className={classes.gridSize}>
+                                <TextField
+                                    label="Name"
+                                    variant="outlined"
+                                    error={formControl.name.error}
+                                    helperText={formControl.name.errorMessage}
+                                    onInput={nameChangeHandler}
+                                    value={formControl.name.value}
+                                />
+                            </Grid>
+                            <Grid item xs={12} className={classes.gridSize}>
+                                <TextField
+                                    label="Description"
+                                    variant="outlined"
+                                    error={formControl.description.error}
+                                    helperText={formControl.description.errorMessage}
+                                    onInput={descriptionChangeHandler}
+                                    multiline
+                                    rows={5}
+                                    value={formControl.description.value}
+                                />
+                            </Grid>
+                            <Grid item xs={12} className={classes.gridSize}>
+                                <TextField
+                                    variant="outlined"
+                                    label="Relase date"
+                                    type="date"
+                                    onChange={dateHandler}
+                                    error={formControl.date.error}
+                                    helperText={formControl.date.errorMessage}
+                                    value={formControl.date.value}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item container xs={12} className={classes.gridSize}>
+                                <TextField
+                                    label="Imgae URL"
+                                    variant="outlined"
+                                    error={formControl.image.error}
+                                    value={formControl.image.value}
+                                    helperText={formControl.image.errorMessage}
+                                    onInput={imageChangeHandler}
+                                />
+                                {imageURL && (
+                                    <img src={imageURL} className={classes.img} alt="poster"/>
+                                )}
+                            </Grid>
+                            <Grid item xs={12} className={classes.gridSize}>
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    color="primary"
+                                >
+                                    Submit
+                                </Button>
+                            </Grid>
                         </Grid>
-                        <Grid item xs={12} className={classes.gridSize}>
-                            <TextField
-                                label="Description"
-                                variant="outlined"
-                                error={formControl.description.error}
-                                helperText={formControl.description.errorMessage}
-                                onInput={descriptionChangeHandler}
-                                multiline
-                                rows={5}
-                                value={formControl.description.value}
-                            />
-                        </Grid>
-                        <Grid item xs={12} className={classes.gridSize}>
-                            <TextField
-                                variant="outlined"
-                                label="Relase date"
-                                type="date"
-                                onChange={dateHandler}
-                                error={formControl.date.error}
-                                helperText={formControl.date.errorMessage}
-                                value={formControl.date.value}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                            />
-                        </Grid>
-                        <Grid item container xs={12} className={classes.gridSize}>
-                            <TextField
-                                label="Imgae URL"
-                                variant="outlined"
-                                error={formControl.image.error}
-                                value={formControl.image.value}
-                                helperText={formControl.image.errorMessage}
-                                onInput={imageChangeHandler}
-                            />
-                            {imageURL && (
-                                <img src={imageURL} className={classes.img} alt="poster"/>
-                            )}
-                        </Grid>
-                        <Grid item xs={12} className={classes.gridSize}>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                color="primary"
-                            >
-                                Submit
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </form>
-            </Container>
-        );
-    else return <Loader/>
+                    </form>
+                </div>
+            ) : (<Loader/>)}
+        </Container>
+    );
 }

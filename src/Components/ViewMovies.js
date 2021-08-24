@@ -5,7 +5,6 @@ import {makeStyles} from "@material-ui/core/styles";
 import axios from "axios";
 import {useAuth0} from "@auth0/auth0-react";
 import Loader from "../Layout/Loader";
-
 const useStyles = makeStyles({
     root: {
         display: "flex",
@@ -53,6 +52,9 @@ export default function ViewMovies() {
                                     addMovies(r.data['movies']);
                                     setMoviesCount(r.data['count']);
                                     setIsLoaded(true);
+                                },
+                                error => {
+                                    console.log(error)
                                 }
                             )
                         } else {

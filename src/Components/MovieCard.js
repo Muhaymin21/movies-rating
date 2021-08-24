@@ -4,6 +4,7 @@ import {yellow} from '@material-ui/core/colors';
 import {MoreVert, Share} from "@material-ui/icons";
 import {useAuth0} from "@auth0/auth0-react";
 import ReactStars from "react-rating-stars-component";
+import useShare from "../Hooks/useShare";
 import {
     Avatar,
     Card,
@@ -14,6 +15,7 @@ import {
     IconButton,
     Typography
 } from "@material-ui/core";
+import axios from "axios";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -52,10 +54,24 @@ const useStyles = makeStyles((theme) => ({
 
 export default function MovieCard(props) {
     const classes = useStyles();
+    const [rate, setRate] = React.useState(props.rate);
     const {isAuthenticated} = useAuth0();
+    const [ShareModal, SnackBar, setShareModalOpen] = useShare(
+        window.location.origin + '/movies/' + props.id
+    );
 
     const ratingChanged = (newRating) => {
-        console.log(`New rating: ${newRating} for movie with ID: ${props.id}`);
+        axios.patch(`/api/movies/${props.id}/rate`, {
+            newRate: newRating
+        }).then(
+            r => {
+                if (r.data.success)
+                    setRate(r.data['newRate']);
+            },
+            error => {
+                console.error(error);
+            }
+        );
     };
 
     function ShortDesc() {
@@ -82,51 +98,56 @@ export default function MovieCard(props) {
     }
 
     return (
-        <Card className={classes.root}>
-            <CardHeader
-                avatar={
-                    <Avatar aria-label="recipe" className={classes.avatar}>
-                        {props.rate}
-                    </Avatar>
-                }
-                action={
-                    <IconButton aria-label="settings">
-                        <MoreVert/>
+        <>
+            <Card className={classes.root}>
+                <CardHeader
+                    avatar={
+                        <Avatar aria-label="recipe" className={classes.avatar}>
+                            {rate}
+                        </Avatar>
+                    }
+                    action={
+                        <IconButton aria-label="settings">
+                            <MoreVert/>
+                        </IconButton>
+                    }
+                    title={props.title}
+                    subheader={props.date}
+                />
+                <CardMedia
+                    className={classes.media}
+                    image={props.image}
+                    title="poster"
+                />
+                <CardContent className={classes.textArea}>
+                    <ShortDesc/>
+                </CardContent>
+                <CardActions disableSpacing>
+                    {isAuthenticated && (
+                        <ReactStars
+                            onChange={ratingChanged}
+                            size={24}
+                            isHalf={true}
+                            value={props.stars}
+                        />
+                    )}
+                    <IconButton
+                        onClick={async () => {
+                            if (typeof navigator.share === "function")
+                                await navigator.share({
+                                    title: props.title,
+                                    text: props.description,
+                                    url: window.location.origin + '/movies/' + props.id,
+                                });
+                            else setShareModalOpen(true);
+                        }}
+                        aria-label="share" style={{marginLeft: 'auto',}}>
+                        <Share/>
                     </IconButton>
-                }
-                title={props.title}
-                subheader={props.date}
-            />
-            <CardMedia
-                className={classes.media}
-                image={props.image}
-                title="poster"
-            />
-            <CardContent className={classes.textArea}>
-                <ShortDesc/>
-            </CardContent>
-            <CardActions disableSpacing>
-                {isAuthenticated && (
-                    <ReactStars
-                        onChange={ratingChanged}
-                        size={24}
-                        isHalf={true}
-                        value={props.stars}
-                    />
-                )}
-                <IconButton
-                    onClick={async () => {
-                        if (typeof navigator.share === "function")
-                            await navigator.share({
-                                title: props.title,
-                                text: props.description,
-                                url: window.location.origin + '/movies/' + props.id,
-                            })
-                    }}
-                    aria-label="share" style={{marginLeft: 'auto',}}>
-                    <Share/>
-                </IconButton>
-            </CardActions>
-        </Card>
+                </CardActions>
+            </Card>
+            <ShareModal/>
+            <SnackBar/>
+        </>
     );
 }

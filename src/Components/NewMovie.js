@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core";
 import axios from "axios";
 import Loader from "../Layout/Loader";
-import useAlert from "../Layout/useAlert";
+import useAlert from "../Hooks/useAlert";
 
 
 const useStyles = makeStyles((theme) => ({

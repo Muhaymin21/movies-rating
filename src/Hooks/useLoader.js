@@ -1,5 +1,5 @@
 import React from "react";
-import Loader from "./Loader";
+import Loader from "../Layout/Loader";
 
 export default function useLoader(initialState = false) {
     const [open, setOpen] = React.useState(initialState);

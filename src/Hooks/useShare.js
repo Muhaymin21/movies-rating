@@ -47,21 +47,22 @@ const useStyles = makeStyles((theme) => ({
 
 export default function useShare(url = "") {
     const [open, setShareModalOpen] = React.useState(false);
-    const [snackBarOpen, setOpen] = React.useState(false);
+    const [snackBarOpen, setSnackBarOpen] = React.useState(false);
+    const [message, setMessage] = React.useState("");
 
     function SnackBar() {
 
-  const handleClose = (event, reason) => {
+  const handleSnackBarClose = (event, reason) => {
     if (reason === 'clickaway') {
       return;
     }
-    setOpen(false);
+    setSnackBarOpen(false);
   };
 
   return (
-      <Snackbar open={snackBarOpen} autoHideDuration={3000} onClose={handleClose}>
-          <MuiAlert elevation={6} variant="filled" onClose={handleClose} severity="success">
-              Movie URL is copied.
+      <Snackbar open={snackBarOpen} autoHideDuration={3000} onClose={handleSnackBarClose}>
+          <MuiAlert elevation={6} variant="filled" onClose={handleSnackBarClose} severity="success">
+              {message}
           </MuiAlert>
       </Snackbar>
   );
@@ -76,9 +77,16 @@ export default function useShare(url = "") {
             setShareModalOpen(false);
         };
 
+        const handleShare = () => {
+            handleClose();
+            setMessage("Share popup opened.");
+            setSnackBarOpen(true);
+        }
+
         const copyURL = () => {
             navigator.clipboard.writeText(url).then(() => {
-                setOpen(true);
+                setMessage("Movie URL is copied.");
+                setSnackBarOpen(true);
                 setShareModalOpen(false);
             }, e => {
                 console.error(e);
@@ -103,31 +111,31 @@ export default function useShare(url = "") {
                         alignItems="center"
                     >
                         <Grid item>
-                            <WhatsappShareButton children={<WhatsappIcon size={iconsSize} round={iconRounded}/>} url={url}/>
+                            <WhatsappShareButton children={<WhatsappIcon onClick={handleShare} size={iconsSize} round={iconRounded}/>} url={url}/>
                         </Grid>
                         <Grid item>
-                            <FacebookShareButton children={<FacebookIcon size={iconsSize} round={iconRounded}/>}
+                            <FacebookShareButton children={<FacebookIcon onClick={handleShare} size={iconsSize} round={iconRounded}/>}
                                                  url={url}/>
                         </Grid>
                         <Grid item>
-                            <TwitterShareButton children={<TwitterIcon size={iconsSize} round={iconRounded}/>}
+                            <TwitterShareButton children={<TwitterIcon onClick={handleShare} size={iconsSize} round={iconRounded}/>}
                                                 url={url}/>
                         </Grid>
                         <Grid item>
-                            <TelegramShareButton children={<TelegramIcon size={iconsSize} round={iconRounded}/>}
+                            <TelegramShareButton children={<TelegramIcon onClick={handleShare} size={iconsSize} round={iconRounded}/>}
                                                  url={url}/>
                         </Grid>
                         <Grid item>
-                            <LinkedinShareButton children={<LinkedinIcon size={iconsSize} round={iconRounded}/>}
+                            <LinkedinShareButton children={<LinkedinIcon onClick={handleShare} size={iconsSize} round={iconRounded}/>}
                                                  url={url}/>
                         </Grid>
                         <Grid item>
-                            <RedditShareButton children={<RedditIcon size={iconsSize} round={iconRounded}/>} url={url}/>
+                            <RedditShareButton children={<RedditIcon onClick={handleShare} size={iconsSize} round={iconRounded}/>} url={url}/>
                         </Grid>
                         <Grid item>
                             <EmailShareButton
                                 subject="Have a look at this movie"
-                                children={<EmailIcon size={iconsSize} round={iconRounded}/>} url={url}
+                                children={<EmailIcon size={iconsSize} onClick={handleShare} round={iconRounded}/>} url={url}
                             />
                         </Grid>
                         <Grid item>

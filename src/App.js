@@ -12,6 +12,7 @@ import axios from "axios";
 import jwt from "jsonwebtoken";
 import NewMovie from "./Components/NewMovie"
 import { setScopes } from "./Redux/ScopeSlice";
+import Movie from "./Components/Movie";
 
 
 export default function App() {
@@ -63,6 +64,7 @@ if (!isLoading) {
                   </p>
               </div>
             </Route>
+              <Route path="/movies/:id" component={Movie}/>
             <Route path="/contactus">
               <h1>Contact us</h1>
             </Route>

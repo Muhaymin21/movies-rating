@@ -5,6 +5,7 @@ import {MoreVert, Share} from "@material-ui/icons";
 import {useAuth0} from "@auth0/auth0-react";
 import ReactStars from "react-rating-stars-component";
 import useShare from "../Hooks/useShare";
+import {Link} from "react-router-dom";
 import {
     Avatar,
     Card,
@@ -12,7 +13,7 @@ import {
     CardContent,
     CardHeader,
     CardMedia,
-    IconButton,
+    IconButton, Menu, MenuItem,
     Typography
 } from "@material-ui/core";
 import axios from "axios";
@@ -48,7 +49,8 @@ const useStyles = makeStyles((theme) => ({
         [theme.breakpoints.down('xs')]: {
             height: "auto",
         },
-    }
+    },
+    linkStyle: {color: "inherit", textDecorationLine: "inherit"}
 }));
 
 
@@ -56,9 +58,17 @@ export default function MovieCard(props) {
     const classes = useStyles();
     const [rate, setRate] = React.useState(props.rate);
     const {isAuthenticated} = useAuth0();
-    const [ShareModal, SnackBar, setShareModalOpen] = useShare(
-        window.location.origin + '/movies/' + props.id
-    );
+    const url = window.location.origin + '/movies/' + props.id;
+    const [ShareModal, SnackBar, setShareModalOpen] = useShare(url);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const handleMoreClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
 
     const ratingChanged = (newRating) => {
         axios.patch(`/api/movies/${props.id}/rate`, {
@@ -97,6 +107,15 @@ export default function MovieCard(props) {
             return (<Typography variant="body2" color="textPrimary" component="p">{props.description}</Typography>);
     }
 
+    function handleMovieDelete() {
+        axios.delete('/api/movies/' + props.id).then((r) => {
+            console.log(r);
+        }, (e) => {
+            console.log(e)
+        });
+        handleMenuClose();
+    }
+
     return (
         <>
             <Card className={classes.root}>
@@ -107,7 +126,9 @@ export default function MovieCard(props) {
                         </Avatar>
                     }
                     action={
-                        <IconButton aria-label="settings">
+                        <IconButton
+                            onClick={handleMoreClick}
+                            aria-label="settings">
                             <MoreVert/>
                         </IconButton>
                     }
@@ -137,7 +158,7 @@ export default function MovieCard(props) {
                                 await navigator.share({
                                     title: props.title,
                                     text: props.description,
-                                    url: window.location.origin + '/movies/' + props.id,
+                                    url
                                 });
                             else setShareModalOpen(true);
                         }}
@@ -148,6 +169,19 @@ export default function MovieCard(props) {
             </Card>
             <ShareModal/>
             <SnackBar/>
+            <Menu
+                id="menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+            >
+                <Link className={classes.linkStyle} to={"/movies/" + props.id}>
+                    <MenuItem onClick={handleMenuClose}>Open</MenuItem>
+                </Link>
+                <MenuItem onClick={handleMenuClose}>Edit</MenuItem>
+                <MenuItem onClick={handleMovieDelete}>Delete</MenuItem>
+            </Menu>
         </>
     );
 }

@@ -19,8 +19,6 @@ import {
     WhatsappIcon,
     WhatsappShareButton
 } from "react-share";
-import Snackbar from "@material-ui/core/Snackbar";
-import MuiAlert from "@material-ui/lab/Alert";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -47,28 +45,8 @@ const useStyles = makeStyles((theme) => ({
 
 export default function useShare(url = "") {
     const [open, setShareModalOpen] = React.useState(false);
-    const [snackBarOpen, setSnackBarOpen] = React.useState(false);
-    const [message, setMessage] = React.useState("");
 
-    function SnackBar() {
-
-  const handleSnackBarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setSnackBarOpen(false);
-  };
-
-  return (
-      <Snackbar open={snackBarOpen} autoHideDuration={3000} onClose={handleSnackBarClose}>
-          <MuiAlert elevation={6} variant="filled" onClose={handleSnackBarClose} severity="success">
-              {message}
-          </MuiAlert>
-      </Snackbar>
-  );
-}
-
-    function ShareModal() {
+    function ShareModal(props) {
         const iconsSize = 40;
         const iconRounded = true;
         const classes = useStyles();
@@ -78,16 +56,14 @@ export default function useShare(url = "") {
         };
 
         const handleShare = () => {
+            props.onClose("Share popup opened.");
             handleClose();
-            setMessage("Share popup opened.");
-            setSnackBarOpen(true);
         }
 
         const copyURL = () => {
             navigator.clipboard.writeText(url).then(() => {
-                setMessage("Movie URL is copied.");
-                setSnackBarOpen(true);
-                setShareModalOpen(false);
+                props.onClose("URL copied to clipboard.");
+                handleClose();
             }, e => {
                 console.error(e);
             });
@@ -147,5 +123,5 @@ export default function useShare(url = "") {
         );
     }
 
-    return [ShareModal, SnackBar, setShareModalOpen];
+    return [ShareModal, setShareModalOpen];
 }

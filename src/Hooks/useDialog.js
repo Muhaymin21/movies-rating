@@ -10,14 +10,13 @@ import { useTheme } from '@material-ui/core/styles';
 
 export default function useDialog() {
 const [openDialog, setDialogOpen] = React.useState(false);
-const [selectedValue, setSelectedValue] = React.useState(false);
   function CustomDialog(props) {
 
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleClose = (value) => {
-    setSelectedValue(value);
+    props.callback(value);
     setDialogOpen(false);
   };
 
@@ -47,5 +46,5 @@ const [selectedValue, setSelectedValue] = React.useState(false);
     </div>
   );
   }
-  return [CustomDialog, selectedValue, setDialogOpen];
+  return [CustomDialog, setDialogOpen];
 }

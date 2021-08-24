@@ -17,6 +17,8 @@ import {
     Typography
 } from "@material-ui/core";
 import axios from "axios";
+import useDialog from "../Hooks/useDialog";
+import {useSelector} from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -61,6 +63,18 @@ export default function MovieCard(props) {
     const url = window.location.origin + '/movies/' + props.id;
     const [ShareModal, SnackBar, setShareModalOpen] = useShare(url);
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [CustomDialog, selectedValue, setDialogOpen] = useDialog();
+    const scopes = useSelector((state) => state.scope.scopes);
+
+    React.useEffect(() => {
+        if (selectedValue) {
+            axios.delete('/api/movies/' + props.id).then((r) => {
+                console.log(r);
+            }, (e) => {
+                console.log(e)
+            });
+        }
+    }, [selectedValue, props.id])
 
     const handleMoreClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -108,11 +122,7 @@ export default function MovieCard(props) {
     }
 
     function handleMovieDelete() {
-        axios.delete('/api/movies/' + props.id).then((r) => {
-            console.log(r);
-        }, (e) => {
-            console.log(e)
-        });
+        setDialogOpen(true);
         handleMenuClose();
     }
 
@@ -179,9 +189,23 @@ export default function MovieCard(props) {
                 <Link className={classes.linkStyle} to={"/movies/" + props.id}>
                     <MenuItem onClick={handleMenuClose}>Open</MenuItem>
                 </Link>
-                <MenuItem onClick={handleMenuClose}>Edit</MenuItem>
-                <MenuItem onClick={handleMovieDelete}>Delete</MenuItem>
+                {isAuthenticated && (
+                    scopes.includes("delete:movie") && (
+                        <>
+                            <MenuItem onClick={handleMenuClose}>Edit</MenuItem>
+                            <MenuItem onClick={handleMovieDelete}>Delete</MenuItem>
+                        </>
+                    )
+                )}
             </Menu>
+            {isAuthenticated && (
+                scopes.includes("delete:movie") && (
+                    <CustomDialog
+                        header="Are you sure?"
+                        body="Continue with this action will result in deleting this movie with all its data."
+                    />
+                )
+            )}
         </>
     );
 }

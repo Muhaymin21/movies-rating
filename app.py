@@ -13,14 +13,6 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 
-def get_rating_data(body):
-    if body is None:
-        abort(400, description="Please provide the data as json.")
-    if "newRate" not in body:
-        abort(400, description="Please insert the new rate.")
-    return body.get('newRate')
-
-
 def check_all_data_posted(body):
     if body is None:
         abort(400, description="Please provide the data as json.")
@@ -184,10 +176,6 @@ def get_user_rates(payload):
         if rates_id_list is not None:
             try:
                 rates = {}
-                # rates = [
-                #     rate.format_output() for rate in Rate.query.filter_by(user_id=user_id).all()
-                #     if rate.movie_id in rates_id_list
-                # ]
                 for rate in Rate.query.filter_by(user_id=user_id).all():
                     if rate.movie_id in rates_id_list:
                         rates[rate.movie_id] = rate.rate
@@ -204,64 +192,42 @@ def get_user_rates(payload):
         abort(400, "Please post json contain selected movies id list")
 
 
-@app.route('/api/movies/<int:movie_id>/rate', methods=['POST'])  # Rating movie the first time
-@requires_auth("write:rate")
-def rate_movie(payload, movie_id):
-    user_id = get_user_id(payload)
-    rate = get_rating_data(request.get_json())
-    try:
-        movie = Movie.query.filter_by(id=movie_id).one_or_none()
-        if movie is None:
-            raise NotFound()
-        new_rate = movie.all_rates_total + rate
-        movie.all_rates_total = new_rate
-        movie.all_rates_count = movie.all_rates_count + 1
-        Rate(
-            movie_id=movie_id,
-            user_id=user_id,
-            rate=rate
-        ).insert()
-        return jsonify({
-            "success": True,
-            "movieID": movie_id,
-            "rate": rate
-        })
-    except NotFound:
-        raise ResourceNotFound("This movie does not exist.")
-    except exc.IntegrityError as error:
-        print(error)
-        db.session.rollback()
-        abort(500, description="This movie is already rated.")
-    except:
-        print(sys.exc_info())
-        db.session.rollback()
-        abort(500, description="The server failed to insert the selected movies rate, please try again later.")
-    finally:
-        db.session.close()
-
-
-@app.route('/api/movies/<int:movie_id>/rate', methods=['PATCH'])  # Edit rated movie
+@app.route('/api/movies/<int:movie_id>/rate', methods=['PATCH'])
 @requires_auth("write:rate")
 def update_rated_movie(payload, movie_id):
     user_id = get_user_id(payload)
-    rate = get_rating_data(request.get_json())
+    body = request.get_json()
+    if body is None:
+        abort(400, description="Please provide the data as json.")
+    if "newRate" not in body:
+        abort(400, description="Please insert the new rate.")
+    rate = body.get('newRate')
     try:
         old_rate = Rate.query.filter(and_(
             Rate.movie_id == movie_id, Rate.user_id == user_id
         )).one_or_none()  # type: Rate
-        if old_rate is None:
-            raise NotFound()
         movie = Movie.query.filter_by(id=movie_id).one_or_none()
         if movie is None:
             raise NotFound()
-        new_rate = movie.all_rates_total + (rate - old_rate.rate)
-        old_rate.rate = rate
+        if old_rate is None:
+            db.session.add(
+                Rate(
+                    movie_id=movie_id,
+                    user_id=user_id,
+                    rate=rate
+                )
+            )
+            movie.all_rates_count = movie.all_rates_count + 1
+            new_rate = movie.all_rates_total + rate
+        else:
+            new_rate = movie.all_rates_total + (rate - old_rate.rate)
+            old_rate.rate = rate
         movie.all_rates_total = new_rate
         db.session.commit()
         return jsonify({
             "success": True,
             "movieID": movie_id,
-            "newRate": rate
+            "newRate": new_rate/movie.all_rates_count
         })
     except NotFound:
         raise ResourceNotFound("This movie does not exist or the data have integrity error.")

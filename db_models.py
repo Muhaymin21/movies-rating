@@ -43,10 +43,6 @@ class Rate(db.Model):
     user_id = db.Column(db.String, nullable=False, primary_key=True)
     rate = db.Column(db.Float, default=0, nullable=False)
 
-    def insert(self):
-        db.session.add(self)
-        db.session.commit()
-
     def delete(self):
         db.session.delete(self)
         db.session.commit()

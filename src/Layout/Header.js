@@ -164,7 +164,7 @@ export default function Header() {
                                     open={menuOpen}
                                     onClose={handleCloseAccount}
                                 >
-                                    <Link to="myprofile" className={classes.linkStyle}>
+                                    <Link to="/profile" className={classes.linkStyle}>
                                         <MenuItem onClick={handleCloseAccount}>Profile</MenuItem>
                                     </Link>
                                     <MenuItem
@@ -212,7 +212,7 @@ export default function Header() {
                         {isAuthenticated ? (
                             <React.Fragment>
                                 {scopes.includes("write:movie") && (
-                                    <Link to="/newmovie" className={classes.linkStyle}>
+                                    <Link to="/movies/create" className={classes.linkStyle}>
                                         <ListItem key="newmovie" button>
                                             <ListItemIcon>
                                                 <PlusOne/>
@@ -221,7 +221,7 @@ export default function Header() {
                                         </ListItem>
                                     </Link>
                                 )}
-                                <Link to="/myProfile" className={classes.linkStyle}>
+                                <Link to="/profile" className={classes.linkStyle}>
                                     <ListItem key="myProfile" button>
                                         <ListItemIcon>
                                             <AccountCircle/>

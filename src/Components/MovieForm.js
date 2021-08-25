@@ -9,6 +9,7 @@ import {
 import axios from "axios";
 import Loader from "../Layout/Loader";
 import useAlert from "../Hooks/useAlert";
+import {useParams} from "react-router-dom";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -35,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-export default function NewMovie() {
+export default function MovieForm() {
     const classes = useStyles();
     const [imageURL, setImageURL] = React.useState("");
     const [isLoaded, setIsLoaded] = React.useState(true);
@@ -66,6 +67,49 @@ export default function NewMovie() {
             value: ""
         }
     });
+    const {movieID} = useParams();
+
+    React.useEffect(() => {
+        if (movieID) {
+            setIsLoaded(false);
+            axios.get('/api/movies/' + movieID).then(res => {
+                if (res.data.success) {
+                    const movie = res.data['movie'];
+                    setFormControl({
+                        name: {
+                            error: false,
+                            errorMessage: "",
+                            canSubmit: true,
+                            value: movie.name
+                        },
+                        description: {
+                            error: false,
+                            errorMessage: "",
+                            canSubmit: true,
+                            value: movie.description
+                        },
+                        image: {
+                            error: false,
+                            errorMessage: "",
+                            canSubmit: true,
+                            value: movie['imgPath']
+                        },
+                        date: {
+                            error: false,
+                            errorMessage: "",
+                            canSubmit: true,
+                            value: movie.date
+                        }
+                    });
+                    setImageURL(movie['imgPath']);
+                }
+            }, error => {
+                console.log(error)
+            }).finally(() => {
+                setIsLoaded(true);
+            });
+        }
+    }, [movieID]);
 
     function nameChangeHandler(e) {
         let error = false;
@@ -141,7 +185,7 @@ export default function NewMovie() {
             error = true;
             setImageURL("");
         } else {
-            testImage(url, 15000).then(r => {
+            testImage(url, 15000).then(() => {
                 setImageURL(url);
             }).catch((e) => {
                 errorMessage = e;
@@ -179,6 +223,41 @@ export default function NewMovie() {
         })
     }
 
+    function successHandler(res) {
+        if (res.data.success) {
+            setType("success");
+            let action = movieID ? "updated," : "added with";
+            setMessage(`The movie has been successfully ${action} ID: ${res.data.id}`);
+            setOpen(true);
+            setFormControl({
+                name: {
+                    ...formControl.name,
+                    value: ""
+                },
+                description: {
+                    ...formControl.description,
+                    value: ""
+                },
+                date: {
+                    ...formControl.date,
+                    value: ""
+                },
+                image: {
+                    ...formControl.image,
+                    value: ""
+                }
+            })
+            setImageURL("");
+        }
+    }
+
+    function errorHandler(error) {
+        setType("error");
+        const action = movieID ? "update this movie" : "add a new movie:";
+        setMessage(`Failed to ${action} ${error.response.data.message}`);
+        setOpen(true);
+    }
+
     function submitHandler(e) {
         e.preventDefault();
         if (!formControl.name.canSubmit)
@@ -191,43 +270,20 @@ export default function NewMovie() {
             setFormControl({...formControl, image: {...formControl.image, error: true}});
         else {
             setIsLoaded(false);
-            axios.post('/api/movies/create', {
+            const submitData = {
                 name: formControl.name.value,
                 description: formControl.description.value,
                 date: formControl.date.value,
                 image: formControl.image.value
-            }).then(r => {
-                if (r.data.success) {
-                    setType("success");
-                    setMessage("The movie has been successfully added with ID: " + r.data.id);
-                    setOpen(true);
-                    setFormControl({
-                        name: {
-                            ...formControl.name,
-                            value: ""
-                        },
-                        description: {
-                            ...formControl.description,
-                            value: ""
-                        },
-                        date: {
-                            ...formControl.date,
-                            value: ""
-                        },
-                        image: {
-                            ...formControl.image,
-                            value: ""
-                        }
-                    })
-                    setImageURL("");
-                }
-            }, e => {
-                setType("error");
-                setMessage("Failed to add a new movie: " + e.response.data.message);
-                setOpen(true);
-            }).finally(() => {
-                setIsLoaded(true);
-            });
+            };
+            if (movieID)
+                axios.patch('/api/movies/' + movieID, submitData).then(successHandler, errorHandler).finally(() => {
+                    setIsLoaded(true);
+                });
+            else
+                axios.post('/api/movies/create', submitData).then(successHandler, errorHandler).finally(() => {
+                    setIsLoaded(true);
+                });
         }
     }
 

@@ -65,14 +65,14 @@ export default function MovieCard(props) {
         const classes = useStyles();
         const [rate, setRate] = React.useState(props.rate);
         const {isAuthenticated} = useAuth0();
-        const url = window.location.origin + '/movies/' + props.id;
-        const [ShareModal, setShareModalOpen] = useShare(url);
+        const shareURL = window.location.origin + '/movies/' + props.id;
+        const [ShareModal, setShareModalOpen] = useShare(shareURL);
         const [anchorEl, setAnchorEl] = React.useState(null);
         const [CustomDialog, setDialogOpen] = useDialog();
         const scopes = useSelector((state) => state.scope.scopes);
 
         function alert(type, message) {
-             setSnackBarMessage(message);
+            setSnackBarMessage(message);
             setSnackBarType(type ? "success" : "error");
             setSnackBarOpen(true);
         }
@@ -82,14 +82,12 @@ export default function MovieCard(props) {
         }
 
         const closeDialogCallback = (desicion) => {
-                        if (desicion) {
+            if (desicion) {
                 axios.delete('/api/movies/' + props.id).then((r) => {
-                    if (r.data.success)
-                    {
+                    if (r.data.success) {
                         setDeleted(true);
                         alert(true, "Movie deleted successfully.");
-                    }
-                    else
+                    } else
                         alert(false, "Failed to delete the movie.");
                 }, () => {
                     alert(false, "Failed to delete the movie.");
@@ -190,7 +188,7 @@ export default function MovieCard(props) {
                                     await navigator.share({
                                         title: props.title,
                                         text: props.description,
-                                        url
+                                        url: shareURL
                                     });
                                 else setShareModalOpen(true);
                             }}
@@ -199,7 +197,7 @@ export default function MovieCard(props) {
                         </IconButton>
                     </CardActions>
                 </Card>
-                <ShareModal onClose={shareCallback} />
+                <ShareModal onClose={shareCallback}/>
                 <SnackBar/>
                 <Menu
                     id="menu"
@@ -208,17 +206,19 @@ export default function MovieCard(props) {
                     open={Boolean(anchorEl)}
                     onClose={handleMenuClose}
                 >
-                        <Link className={classes.linkStyle} to={"/movies/" + props.id}>
-                            <MenuItem onClick={handleMenuClose}>Open</MenuItem>
-                        </Link>
-                        {isAuthenticated && (
-                            scopes.includes("delete:movie") && (
-                                <MenuList>
+                    <Link className={classes.linkStyle} to={"/movies/" + props.id}>
+                        <MenuItem onClick={handleMenuClose}>Open</MenuItem>
+                    </Link>
+                    {isAuthenticated && (
+                        scopes.includes("delete:movie") && (
+                            <MenuList>
+                                <Link className={classes.linkStyle} to={"/movies/" + props.id + "/edit"}>
                                     <MenuItem onClick={handleMenuClose}>Edit</MenuItem>
-                                    <MenuItem onClick={handleMovieDelete}>Delete</MenuItem>
-                                </MenuList>
-                            )
-                        )}
+                                </Link>
+                                <MenuItem onClick={handleMovieDelete}>Delete</MenuItem>
+                            </MenuList>
+                        )
+                    )}
                 </Menu>
                 {isAuthenticated && (
                     scopes.includes("delete:movie") && (

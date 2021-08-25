@@ -10,7 +10,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import ViewMovies from "./Components/ViewMovies";
 import axios from "axios";
 import jwt from "jsonwebtoken";
-import NewMovie from "./Components/NewMovie"
+import MovieForm from "./Components/MovieForm"
 import { setScopes } from "./Redux/ScopeSlice";
 import Movie from "./Components/Movie";
 
@@ -54,8 +54,9 @@ if (!isLoading) {
         ) : (
           <Switch>
             <Route path="/" exact component={ViewMovies} />
-            <Route path="/myprofile" component={MyProfile} />
-              <Route path="/newmovie" component={NewMovie}/>
+            <Route path="/profile" component={MyProfile} />
+              <Route path="/movies/create" component={MovieForm}/>
+              <Route path="/movies/:movieID([0-9]+)/edit" component={MovieForm}/>
             <Route path="/aboutus">
               <div  style={{"textAlign": "center"}}>
               <h1>Capstone</h1>

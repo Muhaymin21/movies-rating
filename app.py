@@ -2,8 +2,9 @@ import sys
 
 from flask import Flask, jsonify, request, abort
 from flask_migrate import Migrate
-from sqlalchemy import exc, and_
+from sqlalchemy import and_
 from werkzeug.exceptions import NotFound
+
 from auth import AuthError, requires_auth
 from db_models import *
 

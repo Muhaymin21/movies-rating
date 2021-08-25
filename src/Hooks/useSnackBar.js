@@ -16,7 +16,7 @@ export default function useSnackBar() {
         };
 
         return (
-            <Snackbar anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }} open={snackBarOpen} autoHideDuration={3000} onClose={handleSnackBarClose}>
+            <Snackbar open={snackBarOpen} autoHideDuration={3000} onClose={handleSnackBarClose}>
                 <MuiAlert elevation={6} variant="filled" onClose={handleSnackBarClose} severity={snackBarType}>
                     {message}
                 </MuiAlert>

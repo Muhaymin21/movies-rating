@@ -7,7 +7,8 @@ import Loader from "../Layout/Loader";
 import StarIcon from '@material-ui/icons/Star';
 import {SpeedDial, SpeedDialAction, SpeedDialIcon} from "@material-ui/lab";
 import {Share} from "@material-ui/icons";
-import useShare from "../Hooks/useShare";
+import useShare from "../Hooks/useShare"
+import useSnackBar from "../Hooks/useSnackBar";;
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -66,6 +67,17 @@ export default function Movie() {
     const [open, setOpen] = React.useState(false);
     const classes = useStyles();
     const [ShareModal, setShareModalOpen] = useShare(window.location.href);
+    const [SnackBar, setSnackBarMessage, setSnackBarOpen, setSnackBarType] = useSnackBar();
+
+        function alert(type, message) {
+            setSnackBarMessage(message);
+            setSnackBarType(type ? "success" : "error");
+            setSnackBarOpen(true);
+        }
+
+        const shareCallback = (message) => {
+            alert(true, message);
+        }
 
     React.useEffect(() => {
         setIsLoaded(false);
@@ -92,10 +104,6 @@ export default function Movie() {
     const handleOpen = () => {
         setOpen(true);
     };
-
-    function shareCallback(message) {
-        console.log(message);
-    }
 
     return (
         <Container className={classes.root}>
@@ -212,6 +220,7 @@ export default function Movie() {
                             />
                         </SpeedDial>
                         <ShareModal onClose={shareCallback}/>
+                        <SnackBar/>
                     </>
 
                 )

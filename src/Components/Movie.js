@@ -2,13 +2,23 @@ import {useParams} from "react-router-dom";
 import React from "react";
 import axios from "axios";
 import {makeStyles} from "@material-ui/core/styles";
-import {Container, Divider, Grid, Typography} from "@material-ui/core";
+import {
+    Avatar,
+    Button,
+    Container,
+    Divider,
+    Grid,
+    Paper,
+    TextField,
+    Typography
+} from "@material-ui/core";
 import Loader from "../Layout/Loader";
 import StarIcon from '@material-ui/icons/Star';
 import {SpeedDial, SpeedDialAction, SpeedDialIcon} from "@material-ui/lab";
 import {Share} from "@material-ui/icons";
 import useShare from "../Hooks/useShare"
-import useSnackBar from "../Hooks/useSnackBar";;
+import useSnackBar from "../Hooks/useSnackBar";
+
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -55,6 +65,18 @@ const useStyles = makeStyles(theme => ({
         bottom: theme.spacing(2),
         right: theme.spacing(2),
     },
+    bordersTest: {
+        border: "1px solid white",
+        borderRadius: 10,
+        boxShadow: theme.shadows['8'],
+        marginBottom: 20,
+        textAlign: "justify",
+        backgroundColor: theme.palette.type === "dark" ? "#303030" : "#fafafa"
+    },
+    commentSection: {
+        margin: "20px 0",
+        width: "90%"
+    }
 }));
 
 
@@ -69,15 +91,15 @@ export default function Movie() {
     const [ShareModal, setShareModalOpen] = useShare(window.location.href);
     const [SnackBar, setSnackBarMessage, setSnackBarOpen, setSnackBarType] = useSnackBar();
 
-        function alert(type, message) {
-            setSnackBarMessage(message);
-            setSnackBarType(type ? "success" : "error");
-            setSnackBarOpen(true);
-        }
+    function alert(type, message) {
+        setSnackBarMessage(message);
+        setSnackBarType(type ? "success" : "error");
+        setSnackBarOpen(true);
+    }
 
-        const shareCallback = (message) => {
-            alert(true, message);
-        }
+    const shareCallback = (message) => {
+        alert(true, message);
+    }
 
     React.useEffect(() => {
         setIsLoaded(false);
@@ -194,6 +216,132 @@ export default function Movie() {
                             <Grid className={classes.margins} item xs={12}><Divider/></Grid>
 
                         </Grid>
+
+
+                        <Paper className={classes.margins} elevation={3} style={{
+                            padding: 10,
+                            width: "90%",
+                            marginBottom: 15
+                        }}>
+                            <Grid
+                                container
+                                spacing={3}
+                                justifyContent="center"
+                                alignItems="center"
+
+                            >
+                                <Grid item xs={11}>
+                                    <Typography align="left" variant="h6">Recent comments</Typography>
+                                    <Typography
+                                        align="left"
+                                        variant="subtitle1"
+                                    >Latest comments section by users</Typography>
+                                </Grid>
+
+                                <Grid
+                                    item
+                                    container
+                                    spacing={3}
+                                    xs={11}
+                                    className={classes.margins}
+                                    direction="column"
+                                    justifyContent="center"
+                                    alignItems="center"
+                                >
+
+                                    <Grid
+                                        className={classes.bordersTest}
+                                        container
+                                        item
+                                        xs={11}
+                                        spacing={1}
+                                    >
+                                        <Grid item>
+                                            <Avatar>M</Avatar>
+                                        </Grid>
+                                        <Grid xs={5} item container direction="column">
+                                            <Grid item>
+                                                <Typography variant="body1">Muhaymin</Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                <Typography variant="subtitle2">Aug 27, 2021</Typography>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid item className={classes.margins}>
+                                            <Typography variant="body2">
+                                                Test comment text Test comment text Test comment text Test comment text
+                                                Test comment text Test comment text Test comment text Test comment text
+                                                Test comment text Test comment text Test comment text Test comment text
+                                                Test comment text Test comment text Test comment text Test comment text
+                                                Test comment text
+                                                Test comment text Test comment text Test comment text Test comment text
+                                                Test comment text Test comment text Test comment text Test comment text
+                                                Test comment text
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+
+
+                                    <Grid container item xs={11} spacing={1} className={classes.bordersTest}>
+                                        <Grid item>
+                                            <Avatar>A</Avatar>
+                                        </Grid>
+                                        <Grid xs={5} item container direction="column">
+                                            <Grid item>
+                                                <Typography variant="body1">Abdulmuhaymin</Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                <Typography variant="subtitle2">Aug 20, 2021</Typography>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body2" className={classes.margins}>
+                                                Test comment text Test comment text Test comment text Test comment text
+                                                Test comment text Test comment text Test comment text Test comment text
+                                                Test comment text Test comment text Test comment text Test comment text
+                                                Test comment text Test comment text Test comment text Test comment text
+                                                Test comment text
+                                                Test comment text Test comment text Test comment text Test comment text
+                                                Test comment text Test comment text Test comment text Test comment text
+                                                Test comment text
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+
+                                </Grid>
+
+                                <Grid item className={classes.margins}>
+                                    <Button variant="outlined">Load More...</Button>
+                                </Grid>
+
+                            </Grid>
+                        </Paper>
+                        <Grid
+                            container
+                            className={classes.commentSection}
+                            alignItems="center"
+                            spacing={2}
+                        >
+                            <Grid item xs={12} sm={11}>
+                                <TextField
+                            style={{width: "100%"}}
+                            id="newComment"
+                            label="Comment"
+                            multiline
+                            variant="outlined"
+                        />
+                            </Grid>
+                            <Grid item xs={12} sm={1}><Button
+                                variant="outlined"
+                                style={{
+                                    display: "block",
+                                    width: "100%",
+                                    padding: "14.5px 14px"
+                                }}
+                            >Send</Button></Grid>
+                        </Grid>
+
+
                         <SpeedDial
                             ariaLabel="SpeedDial example"
                             className={classes.speedDial}

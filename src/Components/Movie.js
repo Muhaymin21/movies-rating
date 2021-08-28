@@ -75,7 +75,7 @@ const useStyles = makeStyles(theme => ({
     },
     commentSection: {
         margin: "20px 0",
-        width: "90%"
+        width: "90%",
     }
 }));
 
@@ -253,13 +253,14 @@ export default function Movie() {
                                         className={classes.bordersTest}
                                         container
                                         item
-                                        xs={11}
+                                        xs={12}
+                                        sm={11}
                                         spacing={1}
                                     >
                                         <Grid item>
                                             <Avatar>M</Avatar>
                                         </Grid>
-                                        <Grid xs={5} item container direction="column">
+                                        <Grid xs={6} sm={5} item container direction="column">
                                             <Grid item>
                                                 <Typography variant="body1">Muhaymin</Typography>
                                             </Grid>
@@ -268,7 +269,7 @@ export default function Movie() {
                                             </Grid>
                                         </Grid>
                                         <Grid item className={classes.margins}>
-                                            <Typography variant="body2">
+                                            <Typography variant="body2" style={{maxHeight: 100, overflowY: "auto"}}>
                                                 Test comment text Test comment text Test comment text Test comment text
                                                 Test comment text Test comment text Test comment text Test comment text
                                                 Test comment text Test comment text Test comment text Test comment text
@@ -282,11 +283,11 @@ export default function Movie() {
                                     </Grid>
 
 
-                                    <Grid container item xs={11} spacing={1} className={classes.bordersTest}>
+                                    <Grid container item xs={12} sm={11} spacing={1} className={classes.bordersTest}>
                                         <Grid item>
                                             <Avatar>A</Avatar>
                                         </Grid>
-                                        <Grid xs={5} item container direction="column">
+                                        <Grid xs={6} sm={5} item container direction="column">
                                             <Grid item>
                                                 <Typography variant="body1">Abdulmuhaymin</Typography>
                                             </Grid>
@@ -294,8 +295,8 @@ export default function Movie() {
                                                 <Typography variant="subtitle2">Aug 20, 2021</Typography>
                                             </Grid>
                                         </Grid>
-                                        <Grid item>
-                                            <Typography variant="body2" className={classes.margins}>
+                                        <Grid item className={classes.margins}>
+                                            <Typography variant="body2" style={{maxHeight: 100, overflowY: "auto"}}>
                                                 Test comment text Test comment text Test comment text Test comment text
                                                 Test comment text Test comment text Test comment text Test comment text
                                                 Test comment text Test comment text Test comment text Test comment text

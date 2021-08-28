@@ -87,6 +87,9 @@ export default function Movie() {
     const [movie, addMovie] = React.useState(null);
     const [error, setError] = React.useState(null);
     const [open, setOpen] = React.useState(false);
+    const [hasMore, setHasMore] = React.useState(true);
+    const [comments, setComments] = React.useState([]);
+    const [loadMore, setLoadMore] = React.useState(1);
     const classes = useStyles();
     const [ShareModal, setShareModalOpen] = useShare(window.location.href);
     const [SnackBar, setSnackBarMessage, setSnackBarOpen, setSnackBarType] = useSnackBar();
@@ -117,6 +120,17 @@ export default function Movie() {
             setIsLoaded(true);
         });
     }, [id]);
+
+    React.useEffect(() => {
+        axios.get(`/api/movies/${id}/comments`, {params: {more: loadMore}}).then(
+            r => {
+                if (r.data.success) {
+                    setComments(r.data['comments'])
+                    setHasMore(r.data['hasMore']);
+                }
+            }
+        )
+    }, [id, loadMore])
 
 
     const handleClose = () => {
@@ -228,7 +242,6 @@ export default function Movie() {
                                 spacing={3}
                                 justifyContent="center"
                                 alignItems="center"
-
                             >
                                 <Grid item xs={11}>
                                     <Typography align="left" variant="h6">Recent comments</Typography>
@@ -249,71 +262,63 @@ export default function Movie() {
                                     alignItems="center"
                                 >
 
-                                    <Grid
-                                        className={classes.bordersTest}
-                                        container
-                                        item
-                                        xs={12}
-                                        sm={11}
-                                        spacing={1}
-                                    >
-                                        <Grid item>
-                                            <Avatar>M</Avatar>
-                                        </Grid>
-                                        <Grid xs={6} sm={5} item container direction="column">
+                                    {comments.map((comment, index) => (
+                                        <Grid
+                                            className={classes.bordersTest}
+                                            container
+                                            item
+                                            xs={12}
+                                            sm={11}
+                                            spacing={1}
+                                            key={index}
+                                        >
                                             <Grid item>
-                                                <Typography variant="body1">Muhaymin</Typography>
+                                                <Avatar>{comment['name'].substring(0, 1)}</Avatar>
                                             </Grid>
-                                            <Grid item>
-                                                <Typography variant="subtitle2">Aug 27, 2021</Typography>
+                                            <Grid xs={6} sm={5} item container direction="column">
+                                                <Grid item>
+                                                    <Typography variant="body1">{comment['name']}</Typography>
+                                                </Grid>
+                                                <Grid item>
+                                                    <Typography variant="subtitle2">{comment['date']}</Typography>
+                                                </Grid>
                                             </Grid>
-                                        </Grid>
-                                        <Grid item className={classes.margins}>
-                                            <Typography variant="body2" style={{maxHeight: 100, overflowY: "auto"}}>
-                                                Test comment text Test comment text Test comment text Test comment text
-                                                Test comment text Test comment text Test comment text Test comment text
-                                                Test comment text Test comment text Test comment text Test comment text
-                                                Test comment text Test comment text Test comment text Test comment text
-                                                Test comment text
-                                                Test comment text Test comment text Test comment text Test comment text
-                                                Test comment text Test comment text Test comment text Test comment text
-                                                Test comment text
-                                            </Typography>
-                                        </Grid>
-                                    </Grid>
-
-
-                                    <Grid container item xs={12} sm={11} spacing={1} className={classes.bordersTest}>
-                                        <Grid item>
-                                            <Avatar>A</Avatar>
-                                        </Grid>
-                                        <Grid xs={6} sm={5} item container direction="column">
-                                            <Grid item>
-                                                <Typography variant="body1">Abdulmuhaymin</Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Typography variant="subtitle2">Aug 20, 2021</Typography>
+                                            <Grid item xs={12} className={classes.margins}>
+                                                <Typography variant="body2" style={{maxHeight: 100, overflowY: "auto"}}>
+                                                    {comment['comment']}
+                                                </Typography>
                                             </Grid>
                                         </Grid>
-                                        <Grid item className={classes.margins}>
-                                            <Typography variant="body2" style={{maxHeight: 100, overflowY: "auto"}}>
-                                                Test comment text Test comment text Test comment text Test comment text
-                                                Test comment text Test comment text Test comment text Test comment text
-                                                Test comment text Test comment text Test comment text Test comment text
-                                                Test comment text Test comment text Test comment text Test comment text
-                                                Test comment text
-                                                Test comment text Test comment text Test comment text Test comment text
-                                                Test comment text Test comment text Test comment text Test comment text
-                                                Test comment text
-                                            </Typography>
-                                        </Grid>
-                                    </Grid>
+                                    ))}
 
                                 </Grid>
 
-                                <Grid item className={classes.margins}>
-                                    <Button variant="outlined">Load More...</Button>
+
+                                <Grid item container justifyContent="space-evenly" className={classes.margins}>
+                                    {
+                                        loadMore > 1 &&
+                                        <Grid item>
+                                            <Button
+                                                variant="outlined"
+                                                onClick={() => {
+                                                    setLoadMore(prevState => prevState - 1)
+                                                }}
+                                            >Show Less</Button>
+                                        </Grid>
+                                    }
+                                    {
+                                        hasMore &&
+                                        <Grid item>
+                                            <Button
+                                                variant="outlined"
+                                                onClick={() => {
+                                                    setLoadMore(prevState => prevState + 1)
+                                                }}
+                                            >Show More</Button>
+                                        </Grid>
+                                    }
                                 </Grid>
+
 
                             </Grid>
                         </Paper>
@@ -325,12 +330,12 @@ export default function Movie() {
                         >
                             <Grid item xs={12} sm={11}>
                                 <TextField
-                            style={{width: "100%"}}
-                            id="newComment"
-                            label="Comment"
-                            multiline
-                            variant="outlined"
-                        />
+                                    style={{width: "100%"}}
+                                    id="newComment"
+                                    label="Comment"
+                                    multiline
+                                    variant="outlined"
+                                />
                             </Grid>
                             <Grid item xs={12} sm={1}><Button
                                 variant="outlined"

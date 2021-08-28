@@ -46,15 +46,33 @@ npm start
 ```
 
 ## Roles
+If you changed the Auth0 data, please include the following roles:
 ### User
+#### Permissions:
+```
+write:rate
+write:comment
+```
+#### What user can do?
 - View Movies, Rates, Comments.
 - Rate movies.
 - Write comments.
 ### Admin
+#### Permissions:
+```
+delete:comment
+delete:movie
+update:movie
+write:comment
+write:movie
+write:rate
+```
+#### What Admin can do?
 - All user role features.
 - Add new movies.
 - Delete movies.
 - Delete comments.
+
 
 ## Error Handling
 Errors are returned as JSON objects in the following format:

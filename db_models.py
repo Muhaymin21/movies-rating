@@ -68,3 +68,11 @@ class Comment(db.Model):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+
+    def format_output(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'comment': self.comment,
+            'date': str(self.date)
+        }

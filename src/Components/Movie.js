@@ -291,7 +291,7 @@ export default function Movie() {
                                     </Grid>
                                     <Grid item xs={8} spacing={0} container>
                                         <Grid item xs={12}>
-                                            <Typography align="left" variant="body1">Rate: {movie.rate}/5</Typography>
+                                            <Typography align="left" variant="body1">Rate: {movie.rate.toFixed(1)}/5</Typography>
                                         </Grid>
                                         <Grid item xs={12}>
                                             <Typography align="left" variant="subtitle2">{movie['rateCount']} Member(s)

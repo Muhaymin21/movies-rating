@@ -63,7 +63,7 @@ export default function MovieCard(props) {
 
     function MoiveCardChild() {
         const classes = useStyles();
-        const [rate, setRate] = React.useState(props.rate);
+        const [rate, setRate] = React.useState(props.rate.toFixed(1));
         const {isAuthenticated} = useAuth0();
         const shareURL = window.location.origin + '/movies/' + props.id;
         const [ShareModal, setShareModalOpen] = useShare(shareURL);
@@ -109,7 +109,7 @@ export default function MovieCard(props) {
             }).then(
                 r => {
                     if (r.data.success)
-                        setRate(r.data['newRate']);
+                        setRate(r.data['newRate'].toFixed(1));
                 },
                 error => {
                     console.error(error);

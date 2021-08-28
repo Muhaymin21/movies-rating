@@ -263,7 +263,6 @@ def get_comments(movie_id):
             raise NotFound()
         load_more_clicks = request.args.get('more', 1, type=int)  # 6 comments for every load more click
         has_more = True
-        start = (load_more_clicks - 1) * 6
         limit = load_more_clicks * 6
         query = Comment.query.filter_by(movie_id=movie_id).order_by(desc(Comment.date))
         if query.count() <= limit:

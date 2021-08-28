@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request, abort
 from flask_migrate import Migrate
 from sqlalchemy import and_, desc
 from werkzeug.exceptions import NotFound
+from datetime import datetime
 
 from auth import AuthError, requires_auth
 from db_models import *
@@ -57,7 +58,7 @@ def get_movies():
         query = Movie.query.order_by(Movie.id)
         movies_per_page = request.args.get("perPage", 3, type=int)
         page = request.args.get('page', 1, type=int)
-        movies = paginate(page, query.limit(page*movies_per_page).all(), movies_per_page)
+        movies = paginate(page, query.limit(page * movies_per_page).all(), movies_per_page)
         return jsonify({
             "success": True,
             "movies": movies,
@@ -176,6 +177,7 @@ def edit_movie(payload, movie_id):
 
 
 @app.route('/api/users/rates', methods=['POST'])
+# I used POST instead of GET because the client has to post selected movies list.
 @requires_auth("")  # User id is fetched from the token payload
 def get_user_rates(payload):
     user_id = get_user_id(payload)
@@ -237,7 +239,7 @@ def update_rated_movie(payload, movie_id):
         return jsonify({
             "success": True,
             "movieID": movie_id,
-            "newRate": new_rate/movie.all_rates_count
+            "newRate": new_rate / movie.all_rates_count
         })
     except NotFound:
         raise ResourceNotFound("This movie does not exist or the data have integrity error.")
@@ -255,26 +257,82 @@ def update_rated_movie(payload, movie_id):
 
 @app.route('/api/movies/<int:movie_id>/comments')
 def get_comments(movie_id):
-    load_more_clicks = request.args.get('more', 1, type=int)  # 6 comments for every load more click
-    has_more = True
-    start = (load_more_clicks - 1) * 6
-    limit = load_more_clicks*6
-    query = Comment.query.filter_by(movie_id=movie_id).order_by(desc(Comment.date))
-    if query.count() <= limit:
-        has_more = False
-    comments = [
-        comment.format_output()
-        for comment
-        in query.limit(limit).all()
-    ]
-    return jsonify({
-        "success": True,
-        "comments": comments[start:],
-        "hasMore": has_more
-    })
+    try:
+        movie = Movie.query.filter_by(id=movie_id).one_or_none()
+        if movie is None:
+            raise NotFound()
+        load_more_clicks = request.args.get('more', 1, type=int)  # 6 comments for every load more click
+        has_more = True
+        start = (load_more_clicks - 1) * 6
+        limit = load_more_clicks * 6
+        query = Comment.query.filter_by(movie_id=movie_id).order_by(desc(Comment.date))
+        if query.count() <= limit:
+            has_more = False
+        comments = [
+            comment.format_output()
+            for comment
+            in query.limit(limit).all()
+        ]
+        return jsonify({
+            "success": True,
+            "comments": comments[start:],
+            "hasMore": has_more
+        })
+    except NotFound:
+        raise ResourceNotFound("Selected movie does not exist.")
+    except:
+        print(sys.exc_info())
+        db.session.rollback()
+        abort(500, description="The server failed to get the comments, please try again later.")
+    finally:
+        db.session.close()
 
+
+@app.route('/api/movies/<int:movie_id>/comment', methods=['POST'])
+@requires_auth('write:comment')
+def post_comment(payload, movie_id):
+    body = request.get_json()
+    if body is None:
+        abort(400, description="Please provide the data as json.")
+    if "name" not in body:
+        abort(400, description="Please include the name.")
+    if "comment" not in body:
+        abort(400, description="Please include the comment.")
+    name = body.get('name')
+    comment = body.get('comment')
+    if len(comment) > 400:
+        abort(400, description="The comment is too long.")
+    try:
+        user_id = get_user_id(payload)
+        movie = Movie.query.filter_by(id=movie_id).one_or_none()
+        if movie is None:
+            raise NotFound()
+        new_comment = Comment(
+            name=name,
+            user_id=user_id,
+            comment=comment,
+            date=datetime.now(),
+            movie_id=movie_id
+        )
+        new_comment.insert()
+        return jsonify({
+            "success": True,
+            "comment": new_comment.format_output()
+        })
+    except NotFound:
+        raise ResourceNotFound("Selected movie does not exist.")
+    except:
+        print(sys.exc_info())
+        db.session.rollback()
+        abort(500, description="The server failed to post the comment, please try again later.")
+    finally:
+        db.session.close()
+
+
+# -----------------  end - Comments endpoints ----------------- #
 
 # -----------------  start - return react frontend ----------------- #
+
 @app.route('/')
 def index():
     return app.send_static_file('index.html')

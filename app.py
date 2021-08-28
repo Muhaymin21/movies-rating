@@ -329,6 +329,31 @@ def post_comment(payload, movie_id):
         db.session.close()
 
 
+@app.route('/api/movies/<int:movie_id>/comments/<int:comment_id>', methods=['DELETE'])
+@requires_auth('delete:comment')
+def delete_comment(payload, movie_id, comment_id):
+    try:
+        comment = Comment.query.filter(and_(
+            Comment.movie_id == movie_id, Comment.id == comment_id
+        )).one_or_none()
+        if comment is not None:
+            comment.delete()
+            return jsonify({
+                "success": True,
+                "id": comment_id
+            })
+        else:
+            raise NotFound()
+    except NotFound:
+        raise ResourceNotFound("This comment does not exist.")
+    except:
+        db.session.rollback()
+        print(sys.exc_info())
+        abort(500, description="The server failed to delete the comment, please try again later.")
+    finally:
+        db.session.close()
+
+
 # -----------------  end - Comments endpoints ----------------- #
 
 # -----------------  start - return react frontend ----------------- #

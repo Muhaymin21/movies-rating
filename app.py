@@ -275,7 +275,7 @@ def get_comments(movie_id):
         ]
         return jsonify({
             "success": True,
-            "comments": comments[start:],
+            "comments": comments,
             "hasMore": has_more
         })
     except NotFound:

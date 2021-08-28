@@ -2,12 +2,13 @@ import {useParams} from "react-router-dom";
 import React from "react";
 import axios from "axios";
 import {makeStyles} from "@material-ui/core/styles";
+import {useAuth0} from "@auth0/auth0-react";
 import {
     Avatar,
     Button,
     Container,
     Divider,
-    Grid,
+    Grid, IconButton,
     Paper,
     TextField,
     Typography
@@ -15,9 +16,10 @@ import {
 import Loader from "../Layout/Loader";
 import StarIcon from '@material-ui/icons/Star';
 import {SpeedDial, SpeedDialAction, SpeedDialIcon} from "@material-ui/lab";
-import {Share} from "@material-ui/icons";
+import {Delete, Share} from "@material-ui/icons";
 import useShare from "../Hooks/useShare"
 import useSnackBar from "../Hooks/useSnackBar";
+import {useSelector} from "react-redux";
 
 
 const useStyles = makeStyles(theme => ({
@@ -60,6 +62,12 @@ const useStyles = makeStyles(theme => ({
         marginTop: 10,
         marginBottom: 10
     },
+    onlyLaptop: {
+        float: "right",
+        [theme.breakpoints.down('sm')]: {
+            display: "none",
+        }
+    },
     speedDial: {
         position: 'fixed',
         bottom: theme.spacing(2),
@@ -84,12 +92,22 @@ export default function Movie() {
 
     let {id} = useParams();
     const [isLoaded, setIsLoaded] = React.useState(false);
+    const {isAuthenticated, user} = useAuth0();
     const [movie, addMovie] = React.useState(null);
     const [error, setError] = React.useState(null);
     const [open, setOpen] = React.useState(false);
-    const [hasMore, setHasMore] = React.useState(true);
+    const [hasMore, setHasMore] = React.useState(false);
     const [comments, setComments] = React.useState([]);
     const [loadMore, setLoadMore] = React.useState(1);
+    const [commentsError, setCommentsError] = React.useState(null);
+    const [commentsLoad, setCommentsLoad] = React.useState(false);
+    const scopes = useSelector((state) => state.scope.scopes);
+    const [newComment, setNewComment] = React.useState({
+        error: false,
+        errorMessage: "",
+        canSubmit: false,
+        value: ""
+    });
     const classes = useStyles();
     const [ShareModal, setShareModalOpen] = useShare(window.location.href);
     const [SnackBar, setSnackBarMessage, setSnackBarOpen, setSnackBarType] = useSnackBar();
@@ -102,7 +120,7 @@ export default function Movie() {
 
     const shareCallback = (message) => {
         alert(true, message);
-    }
+    };
 
     React.useEffect(() => {
         setIsLoaded(false);
@@ -122,14 +140,22 @@ export default function Movie() {
     }, [id]);
 
     React.useEffect(() => {
+        setCommentsLoad(true);
         axios.get(`/api/movies/${id}/comments`, {params: {more: loadMore}}).then(
             r => {
                 if (r.data.success) {
                     setComments(r.data['comments'])
                     setHasMore(r.data['hasMore']);
                 }
+            },
+            e => {
+                setCommentsError({
+                    message: e.message,
+                    status: e.response.status,
+                    response: e.response.data.message
+                });
             }
-        )
+        ).finally(() => setCommentsLoad(false));
     }, [id, loadMore])
 
 
@@ -140,6 +166,77 @@ export default function Movie() {
     const handleOpen = () => {
         setOpen(true);
     };
+
+    function commentFieldHandler(e) {
+        let error = false;
+        let errorMessage = "";
+        let value = e.target.value;
+        if (value === '') {
+            errorMessage = "Comment cannot be empty.";
+            error = true;
+        } else if (value.length > 400) {
+            errorMessage = "Comment is too long (Maximum is 400 character).";
+            error = true;
+        }
+        setNewComment({
+            error,
+            errorMessage,
+            canSubmit: !error,
+            value
+        });
+    }
+
+    function postComment(e) {
+        e.preventDefault();
+        if (newComment.canSubmit) {
+            setIsLoaded(false);
+            axios.post(`/api/movies/${id}/comment`, {
+                comment: newComment.value,
+                name: (user.name !== user.email) ? user.name : user.nickname
+            }).then(
+                r => {
+                    if (r.data.success) {
+                        setComments(currentComments => [r.data['comment'], ...currentComments]);
+                        alert(true, "Comment posted");
+                    }
+                },
+                () => {
+                    alert(false, "Failed to post comment");
+                }
+            ).finally(() => {
+                setIsLoaded(true);
+                setNewComment({
+                    error: false,
+                    value: "",
+                    canSubmit: false,
+                    errorMessage: ""
+                });
+            })
+        } else setNewComment({...newComment, error: true});
+    }
+
+    function formatDate(date) {
+        const d = new Date(date);
+        const H = d.getHours();
+        const h = H % 12 || 12;
+        const ampm = (H < 12 || H === 24) ? "AM" : "PM";
+        return `${d.getDate()}-${d.getMonth() + 1}-${d.getFullYear()}, ${h}:${d.getMinutes()}:${d.getSeconds()} ${ampm}`;
+    }
+
+    function deleteComment(commentID, index) {
+        setIsLoaded(false);
+        axios.delete(`/api/movies/${id}/comments/${commentID}`).then(
+                r => {
+                    if (r.data.success) {
+                        alert(true, "Comment deleted");
+                        let newList = comments;
+                        newList.splice(index, 1);
+                        setComments(newList);
+                    }
+                },
+            () => alert(false, "Failed to delete the comment")
+        ).finally(()=>setIsLoaded(true));
+    }
 
     return (
         <Container className={classes.root}>
@@ -262,34 +359,74 @@ export default function Movie() {
                                     alignItems="center"
                                 >
 
-                                    {comments.map((comment, index) => (
-                                        <Grid
-                                            className={classes.bordersTest}
-                                            container
-                                            item
-                                            xs={12}
-                                            sm={11}
-                                            spacing={1}
-                                            key={index}
-                                        >
-                                            <Grid item>
-                                                <Avatar>{comment['name'].substring(0, 1)}</Avatar>
-                                            </Grid>
-                                            <Grid xs={6} sm={5} item container direction="column">
-                                                <Grid item>
-                                                    <Typography variant="body1">{comment['name']}</Typography>
-                                                </Grid>
-                                                <Grid item>
-                                                    <Typography variant="subtitle2">{comment['date']}</Typography>
-                                                </Grid>
-                                            </Grid>
-                                            <Grid item xs={12} className={classes.margins}>
-                                                <Typography variant="body2" style={{maxHeight: 100, overflowY: "auto"}}>
-                                                    {comment['comment']}
-                                                </Typography>
-                                            </Grid>
-                                        </Grid>
-                                    ))}
+                                    {
+                                        commentsError ? (
+                                                <div style={{textAlign: "center", marginTop: 50, color: "red"}}>
+                                                    <Typography variant="h3">
+                                                        {commentsError.status}
+                                                    </Typography>
+                                                    <Typography variant="h6">
+                                                        {commentsError.message}
+                                                    </Typography>
+                                                    <Typography variant="h6">
+                                                        {commentsError.response}
+                                                    </Typography>
+                                                </div>
+                                            ) :
+                                            comments.length > 0 ?
+                                                comments.map((comment, index) => (
+                                                    <Grid
+                                                        className={classes.bordersTest}
+                                                        container
+                                                        item
+                                                        xs={12}
+                                                        sm={11}
+                                                        spacing={1}
+                                                        key={index}
+                                                    >
+                                                        <Grid item container xs={10} sm={11} spacing={1}>
+                                                            <Grid item>
+                                                                <Avatar>{comment['name'].substring(0, 1)}</Avatar>
+                                                            </Grid>
+                                                            <Grid xs={6} sm={5} item container direction="column">
+                                                                <Grid item>
+                                                                    <Typography
+                                                                        variant="body1">{comment['name']}</Typography>
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    <Typography
+                                                                        variant="subtitle2">{
+                                                                        formatDate(comment['date'])
+                                                                    }</Typography>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+                                                        {
+                                                            isAuthenticated &&
+                                                            scopes.includes("delete:movie") &&
+                                                            <Grid item xs={1}>
+                                                                <IconButton
+                                                                    onClick={
+                                                                        () => {
+                                                                            const confirm = window.confirm("Are you sure?");
+                                                                            if (confirm)
+                                                                                deleteComment(comment["id"], index);
+                                                                        }
+                                                                    }
+                                                                >
+                                                                    <Delete/>
+                                                                </IconButton>
+                                                            </Grid>
+                                                        }
+
+                                                        <Grid item xs={12} className={classes.margins}>
+                                                            <Typography variant="body2"
+                                                                        style={{maxHeight: 100, overflowY: "auto"}}>
+                                                                {comment['comment']}
+                                                            </Typography>
+                                                        </Grid>
+                                                    </Grid>
+                                                )) : (<Typography>No comments yet</Typography>)}
 
                                 </Grid>
 
@@ -300,9 +437,10 @@ export default function Movie() {
                                         <Grid item>
                                             <Button
                                                 variant="outlined"
-                                                onClick={() => {
+                                                disabled={commentsLoad}
+                                                onClick={() =>
                                                     setLoadMore(prevState => prevState - 1)
-                                                }}
+                                                }
                                             >Show Less</Button>
                                         </Grid>
                                     }
@@ -310,10 +448,11 @@ export default function Movie() {
                                         hasMore &&
                                         <Grid item>
                                             <Button
+                                                disabled={commentsLoad}
                                                 variant="outlined"
-                                                onClick={() => {
+                                                onClick={() =>
                                                     setLoadMore(prevState => prevState + 1)
-                                                }}
+                                                }
                                             >Show More</Button>
                                         </Grid>
                                     }
@@ -322,32 +461,41 @@ export default function Movie() {
 
                             </Grid>
                         </Paper>
-                        <Grid
-                            container
-                            className={classes.commentSection}
-                            alignItems="center"
-                            spacing={2}
-                        >
-                            <Grid item xs={12} sm={11}>
-                                <TextField
-                                    style={{width: "100%"}}
-                                    id="newComment"
-                                    label="Comment"
-                                    multiline
-                                    variant="outlined"
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={1}><Button
-                                variant="outlined"
-                                style={{
-                                    display: "block",
-                                    width: "100%",
-                                    padding: "14.5px 14px"
-                                }}
-                            >Send</Button></Grid>
-                        </Grid>
-
-
+                        {
+                            isAuthenticated ?
+                                <Grid
+                                    container
+                                    className={classes.commentSection}
+                                    alignItems="center"
+                                    spacing={2}
+                                >
+                                    <Grid item xs={12} sm={11}>
+                                        <form onSubmit={postComment} id="newCommentForm">
+                                            <TextField
+                                                style={{width: "100%"}}
+                                                error={newComment.error}
+                                                helperText={newComment.errorMessage}
+                                                value={newComment.value}
+                                                onInput={commentFieldHandler}
+                                                id="newComment"
+                                                label="Comment"
+                                                multiline
+                                                variant="outlined"
+                                            />
+                                        </form>
+                                    </Grid>
+                                    <Grid item xs={12} sm={1}><Button
+                                        variant="outlined"
+                                        style={{
+                                            display: "block",
+                                            width: "100%",
+                                            padding: "14.5px 14px"
+                                        }}
+                                        type="submit"
+                                        form="newCommentForm"
+                                    >Send</Button></Grid>
+                                </Grid> : <Typography variant="h6">Login if you want to comment</Typography>
+                        }
                         <SpeedDial
                             ariaLabel="SpeedDial example"
                             className={classes.speedDial}

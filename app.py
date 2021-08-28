@@ -2,7 +2,7 @@ import sys
 
 from flask import Flask, jsonify, request, abort
 from flask_migrate import Migrate
-from sqlalchemy import and_
+from sqlalchemy import and_, desc
 from werkzeug.exceptions import NotFound
 
 from auth import AuthError, requires_auth
@@ -48,12 +48,16 @@ def get_user_id(payload):
         abort(401, "The server failed to retrieve your ID, please try to sign out then sign in again.")
 
 
+# -----------------  start - Movies endpoints ----------------- #
+
+
 @app.route('/api/movies')  # get all movies
 def get_movies():
     try:
         query = Movie.query.order_by(Movie.id)
         movies_per_page = request.args.get("perPage", 3, type=int)
-        movies = paginate(request.args.get('page', 1, type=int), query.all(), movies_per_page)
+        page = request.args.get('page', 1, type=int)
+        movies = paginate(page, query.limit(page*movies_per_page).all(), movies_per_page)
         return jsonify({
             "success": True,
             "movies": movies,
@@ -166,6 +170,11 @@ def edit_movie(payload, movie_id):
         db.session.close()
 
 
+# -----------------  end - Movies endpoints ----------------- #
+
+# -----------------  start - Rate endpoints ----------------- #
+
+
 @app.route('/api/users/rates', methods=['POST'])
 @requires_auth("")  # User id is fetched from the token payload
 def get_user_rates(payload):
@@ -238,6 +247,31 @@ def update_rated_movie(payload, movie_id):
         abort(500, description="The server failed to insert the selected movies rate, please try again later.")
     finally:
         db.session.close()
+
+
+# -----------------  end - Rate endpoints ----------------- #
+
+# -----------------  start - Comments endpoints ----------------- #
+
+@app.route('/api/movies/<int:movie_id>/comments')
+def get_comments(movie_id):
+    load_more_clicks = request.args.get('more', 1, type=int)  # 6 comments for every load more click
+    has_more = True
+    start = (load_more_clicks - 1) * 6
+    limit = load_more_clicks*6
+    query = Comment.query.filter_by(movie_id=movie_id).order_by(desc(Comment.date))
+    if query.count() <= limit:
+        has_more = False
+    comments = [
+        comment.format_output()
+        for comment
+        in query.limit(limit).all()
+    ]
+    return jsonify({
+        "success": True,
+        "comments": comments[start:],
+        "hasMore": has_more
+    })
 
 
 # -----------------  start - return react frontend ----------------- #
